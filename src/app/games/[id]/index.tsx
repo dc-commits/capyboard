@@ -1,6 +1,7 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
+import { GameLeaderboard } from '@/components/GameLeaderboard';
 import { getGame } from '@/data/games';
 import { useContentStyle } from '@/hooks/useContentStyle';
 import { useFavorites } from '@/store/favorites';
@@ -57,6 +58,8 @@ export default function GameScreen() {
         onPress={() => router.push({ pathname: '/games/[id]/rules', params: { id: game.id } })}
       />
       <Button label="➕  Nouvelle partie" onPress={() => router.push({ pathname: '/games/[id]/new-match', params: { id: game.id } })} />
+
+      <GameLeaderboard game={game} />
 
       <Text style={common.sectionTitle}>Parties ({gameMatches.length})</Text>
       {gameMatches.length === 0 && <Text style={common.subtitle}>Aucune partie pour l’instant.</Text>}
