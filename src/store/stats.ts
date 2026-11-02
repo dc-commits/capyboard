@@ -1,4 +1,4 @@
-import { GAMES, type Game } from '@/data/games';
+import type { Game } from '@/data/games';
 import { getTotals, getWinners, type Match } from '@/store/matches';
 import type { Player } from '@/store/players';
 
@@ -37,8 +37,8 @@ function getGameStats(playerId: string, game: Game, matches: Match[]): GameStats
 }
 
 /** Statistiques d'un profil sur ses parties terminées */
-export function getPlayerStats(playerId: string, matches: Match[]): PlayerStats {
-  const byGame = GAMES.flatMap((game) => getGameStats(playerId, game, matches) ?? []).sort((a, b) => b.played - a.played);
+export function getPlayerStats(playerId: string, matches: Match[], games: Game[]): PlayerStats {
+  const byGame = games.flatMap((game) => getGameStats(playerId, game, matches) ?? []).sort((a, b) => b.played - a.played);
 
   return {
     played: byGame.reduce((sum, stats) => sum + stats.played, 0),

@@ -10,13 +10,15 @@ Application mobile (Android, iOS) pour lire les règles de ses jeux de société
 
 ## Fonctionnalités
 
-- **Jeux** : Skyjo, Capybaraka, Flip 7 et Odin, avec recherche et favoris en tête de liste.
+- **Bibliothèque de jeux** : on choisit ses jeux dans le catalogue (Skyjo, Capybaraka, Flip 7, Odin, 6 qui prend !, Le Baron) et on peut **créer les siens** depuis l'app (fiche, fin de partie, règles).
+- **Recherche, tri et filtres** : favoris en tête, tri A → Z, plus joués ou récents, filtres par nombre de joueurs et durée.
 - **Règles** détaillées par sections, résumées d'après les livrets officiels.
 - **Feuille de score** par manche, avec une aide au calcul propre à chaque jeu :
   - Skyjo : grille + « a fini la manche », doublement automatique du finisseur ;
   - Capybaraka : somme des cartes, pastèques et Fiesta, départage officiel des égalités ;
   - Flip 7 : sélection des cartes dans une fenêtre (numéros, bonus, ×2, Sauté), Flip 7 détecté seul ;
-  - Odin : cartes restées en main.
+  - Odin : cartes restées en main ;
+  - 6 qui prend ! et Le Baron : têtes de bœuf.
 - **Fin de partie automatique** (seuil de points ou nombre de manches), reprise et revanche.
 - **Parties en cours** sur l'accueil, pour reprendre en un toucher.
 - **Profils de joueurs** (avatar, couleur) et **statistiques** : victoires, meilleur score, moyenne par jeu.
@@ -55,29 +57,34 @@ npx expo lint
 ```
 src/
   app/                 Écrans (Expo Router)
-    index.tsx          Accueil : recherche, parties en cours, jeux
-    games/[id]/        Fiche d'un jeu, règles, nouvelle partie
+    index.tsx          Accueil : recherche, parties en cours, bibliothèque, tri et filtres
+    library.tsx        Catalogue : ajouter/retirer des jeux, créer un jeu
+    games/[id]/        Fiche d'un jeu, règles, nouvelle partie, modification
+    games/new.tsx      Création d'un jeu
     matches/[matchId]  Feuille de score d'une partie
     players/           Liste, création et fiche des joueurs
   components/          Composants partagés (saisie détaillée, avatar…)
-  data/games.ts        Catalogue des jeux : fiche, règles, calcul des scores
-  store/               Données persistées (parties, joueurs, favoris) et stats
+  data/games.ts        Catalogue intégré : fiche, règles, calcul des scores
+  store/               Données persistées (jeux créés et bibliothèque, parties, joueurs, favoris) et stats
 assets/                Icônes, écran de démarrage, logo (source : logo.svg)
 ```
 
 ## Ajouter un jeu
 
-Tout se passe dans [`src/data/games.ts`](src/data/games.ts), en ajoutant une entrée à `GAMES` :
+Depuis l'app : « Ajouter des jeux » en bas de l'accueil, puis « Créer un jeu ». Les jeux créés utilisent la saisie simple (un score par joueur et par manche) ; leurs règles se tapent avec « # Titre », « - puce » et « 1. étape ».
+
+Pour un jeu du catalogue avec une aide au calcul, tout se passe dans [`src/data/games.ts`](src/data/games.ts), en ajoutant une entrée à `BUILT_IN_GAMES` :
 
 ```ts
 {
   id: 'mon-jeu',
   name: 'Mon jeu',
   emoji: '🎲',
-  players: '2 à 5 joueurs',
-  duration: '30 min',
+  minPlayers: 2,
+  maxPlayers: 5,                                    // absent : pas de maximum
+  durationMinutes: 30,
   winner: 'highest',                                // ou 'lowest'
-  endCondition: { type: 'threshold', points: 100 }, // ou { type: 'rounds', count: 3 }
+  endCondition: { type: 'threshold', points: 100 }, // ou { type: 'rounds', count: 3 }, { type: 'manual' }
   rules: [{ title: 'But du jeu', body: '…', items: ['…', '1. étape numérotée'] }],
 }
 ```

@@ -5,6 +5,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { PlayerForm } from '@/components/PlayerForm';
 import { useContentStyle } from '@/hooks/useContentStyle';
+import { useGames } from '@/store/games';
 import { useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { getPlayerStats } from '@/store/stats';
@@ -24,6 +25,7 @@ function winRate(wins: number, played: number): string {
 }
 
 export default function PlayerScreen() {
+  const { games } = useGames();
   const contentStyle = useContentStyle();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getPlayer, updatePlayer, deletePlayer } = usePlayers();
@@ -33,7 +35,7 @@ export default function PlayerScreen() {
 
   if (!player) return <Text style={common.content}>Joueur introuvable</Text>;
 
-  const stats = getPlayerStats(player.id, matches);
+  const stats = getPlayerStats(player.id, matches, games);
 
   const confirmDelete = () =>
     Alert.alert(`Supprimer ${player.name} ?`, 'Ses parties sont conservées, mais ne compteront plus dans ses statistiques.', [

@@ -3,12 +3,14 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { useContentStyle } from '@/hooks/useContentStyle';
+import { useGames } from '@/store/games';
 import { useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { getPlayerStats } from '@/store/stats';
 import { common } from '@/theme';
 
 export default function PlayersScreen() {
+  const { games } = useGames();
   const contentStyle = useContentStyle();
   const { players } = usePlayers();
   const { matches } = useMatches();
@@ -24,7 +26,7 @@ export default function PlayersScreen() {
         <Text style={common.subtitle}>Aucun joueur pour l’instant. Crée un profil ici ou directement en lançant une partie.</Text>
       }
       renderItem={({ item: player }) => {
-        const { played, wins } = getPlayerStats(player.id, matches);
+        const { played, wins } = getPlayerStats(player.id, matches, games);
         return (
           <Pressable
             onPress={() => router.push({ pathname: '/players/[id]', params: { id: player.id } })}

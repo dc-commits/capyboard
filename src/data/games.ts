@@ -61,15 +61,19 @@ export type DetailedScoring = {
   hint?: (detail: RoundDetail) => string | null;
 };
 
-/** Quand la partie s'arrête : un joueur atteint un seuil, ou un nombre fixe de manches */
-export type EndCondition = { type: 'threshold'; points: number } | { type: 'rounds'; count: number };
+/** Quand la partie s'arrête : un joueur atteint un seuil, un nombre fixe de manches, ou quand on le décide */
+export type EndCondition = { type: 'threshold'; points: number } | { type: 'rounds'; count: number } | { type: 'manual' };
 
 export type Game = {
   id: string;
   name: string;
   emoji: string;
-  players: string;
-  duration: string;
+  minPlayers: number;
+  /** Absent : pas de maximum (« 3 joueurs et plus ») */
+  maxPlayers?: number;
+  durationMinutes: number;
+  /** Jeu créé dans l'app (modifiable), par opposition au catalogue intégré */
+  custom?: boolean;
   /** Qui gagne : le plus haut total ou le plus bas */
   winner: 'highest' | 'lowest';
   endCondition: EndCondition;
@@ -100,13 +104,14 @@ export function capybarakaFiestaPoints(cards: number): number {
 }
 
 // Les règles sont des résumés rédigés d'après les livrets officiels, pas des copies.
-export const GAMES: Game[] = [
+export const BUILT_IN_GAMES: Game[] = [
   {
     id: 'skyjo',
     name: 'Skyjo',
     emoji: '🃏',
-    players: '2 à 8 joueurs',
-    duration: '30 min',
+    minPlayers: 2,
+    maxPlayers: 8,
+    durationMinutes: 30,
     winner: 'lowest',
     endCondition: { type: 'threshold', points: 100 },
     scoring: {
@@ -173,8 +178,9 @@ export const GAMES: Game[] = [
     id: 'capybaraka',
     name: 'Capybaraka',
     emoji: '🍉',
-    players: '2 à 6 joueurs',
-    duration: '20 min',
+    minPlayers: 2,
+    maxPlayers: 6,
+    durationMinutes: 20,
     winner: 'highest',
     endCondition: { type: 'rounds', count: 2 },
     scoring: {
@@ -273,8 +279,8 @@ export const GAMES: Game[] = [
     id: 'flip7',
     name: 'Flip 7',
     emoji: '7️⃣',
-    players: '3 joueurs et plus',
-    duration: '20 min',
+    minPlayers: 3,
+    durationMinutes: 20,
     winner: 'highest',
     endCondition: { type: 'threshold', points: 200 },
     scoring: {
@@ -390,8 +396,9 @@ export const GAMES: Game[] = [
     id: 'odin',
     name: 'Odin',
     emoji: '🛡️',
-    players: '2 à 6 joueurs',
-    duration: '20 min',
+    minPlayers: 2,
+    maxPlayers: 6,
+    durationMinutes: 20,
     winner: 'lowest',
     endCondition: { type: 'threshold', points: 15 },
     scoring: {
@@ -459,8 +466,9 @@ export const GAMES: Game[] = [
     id: 'six-qui-prend',
     name: '6 qui prend !',
     emoji: '🐮',
-    players: '2 à 10 joueurs',
-    duration: '45 min',
+    minPlayers: 2,
+    maxPlayers: 10,
+    durationMinutes: 45,
     winner: 'lowest',
     // La partie s'arrête quand un joueur dépasse 66 têtes, donc à 67 ou plus
     endCondition: { type: 'threshold', points: 67 },
@@ -533,8 +541,9 @@ export const GAMES: Game[] = [
     id: 'le-baron',
     name: '6 qui prend ! Le Baron',
     emoji: '🎩',
-    players: '2 à 10 joueurs',
-    duration: '30 min',
+    minPlayers: 2,
+    maxPlayers: 10,
+    durationMinutes: 30,
     winner: 'lowest',
     // Une seule partie par défaut ; « Reprendre la partie » permet d'en enchaîner d'autres
     endCondition: { type: 'rounds', count: 1 },
@@ -602,6 +611,24 @@ export const GAMES: Game[] = [
   },
 ];
 
-export function getGame(id: string): Game | undefined {
-  return GAMES.find((game) => game.id === id);
+export function formatPlayers(game: Pick<Game, 'minPlayers' | 'maxPlayers'>): string {
+  if (game.maxPlayers === undefined) return `${game.minPlayers} joueurs et plus`;
+  if (game.maxPlayers === game.minPlayers) return `${game.minPlayers} joueurs`;
+  return `${game.minPlayers} à ${game.maxPlayers} joueurs`;
+}
+
+export function formatDuration(game: Pick<Game, 'durationMinutes'>): string {
+  return `${game.durationMinutes} min`;
+}
+
+/** « dès qu'un joueur atteint 100 points », « après 2 manches »… */
+export function describeEnd(endCondition: EndCondition): string {
+  if (endCondition.type === 'rounds') return `après ${endCondition.count} manche${endCondition.count > 1 ? 's' : ''}`;
+  if (endCondition.type === 'threshold') return `dès qu’un joueur atteint ${endCondition.points} points`;
+  return 'quand vous le décidez';
+}
+
+/** Un nombre de joueurs donné peut-il jouer à ce jeu ? */
+export function acceptsPlayers(game: Pick<Game, 'minPlayers' | 'maxPlayers'>, count: number): boolean {
+  return count >= game.minPlayers && (game.maxPlayers === undefined || count <= game.maxPlayers);
 }

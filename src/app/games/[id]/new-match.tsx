@@ -3,13 +3,14 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
-import { getGame } from '@/data/games';
 import { useContentStyle } from '@/hooks/useContentStyle';
+import { useGames } from '@/store/games';
 import { useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { colors, common } from '@/theme';
 
 export default function NewMatchScreen() {
+  const { getGame } = useGames();
   const contentStyle = useContentStyle();
   const { id } = useLocalSearchParams<{ id: string }>();
   const game = getGame(id);

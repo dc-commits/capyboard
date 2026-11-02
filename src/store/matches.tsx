@@ -123,6 +123,7 @@ export function getTotals(match: Match): number[] {
 
 export function isGameOver(match: Match, endCondition: EndCondition): boolean {
   if (endCondition.type === 'rounds') return match.rounds.length >= endCondition.count;
+  if (endCondition.type === 'manual') return false;
   return getTotals(match).some((total) => total >= endCondition.points);
 }
 
@@ -139,6 +140,7 @@ export function getProgress(match: Match, game: Game): string {
       ? `Manche ${next} sur ${endCondition.count} · dernière manche !`
       : `Manche ${next} sur ${endCondition.count}`;
   }
+  if (endCondition.type === 'manual') return `Manche ${match.rounds.length + 1} · « Terminer la partie » quand vous le décidez`;
   if (match.rounds.length === 0) return `La partie s’arrête quand un joueur atteint ${endCondition.points} points`;
   const totals = getTotals(match);
   const max = Math.max(...totals);
@@ -153,6 +155,7 @@ export function getEndReason(match: Match, game: Game): string {
   if (endCondition.type === 'rounds') {
     return match.rounds.length >= endCondition.count ? `Partie terminée en ${played}` : `Partie arrêtée après ${played}`;
   }
+  if (endCondition.type === 'manual') return `Partie terminée en ${played}`;
   const totals = getTotals(match);
   const reached = match.players.filter((_, index) => totals[index] >= endCondition.points);
   if (reached.length === 0) return `Partie arrêtée après ${played}, avant ${endCondition.points} points`;

@@ -4,13 +4,14 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, Te
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { DetailedRoundEntry, formatDetail, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
-import { getGame } from '@/data/games';
 import { useContentStyle } from '@/hooks/useContentStyle';
+import { useGames } from '@/store/games';
 import { usePlayers } from '@/store/players';
 import { getEndReason, getProgress, getTieBreakerTotals, getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
 export default function MatchScreen() {
+  const { getGame } = useGames();
   const contentStyle = useContentStyle();
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const { getPlayer } = usePlayers();

@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
-import { getGame, type Game } from '@/data/games';
+import type { Game } from '@/data/games';
+import { useGames } from '@/store/games';
 import { getProgress, useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { colors, common } from '@/theme';
@@ -25,6 +26,7 @@ type Props = {
 
 export function OngoingMatches({ filter }: Props) {
   const { matches } = useMatches();
+  const { getGame } = useGames();
   const { getPlayer } = usePlayers();
 
   const ongoing = matches

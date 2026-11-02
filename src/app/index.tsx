@@ -1,27 +1,40 @@
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
 import { OngoingMatches } from '@/components/OngoingMatches';
 import { UpdateBanner } from '@/components/UpdateBanner';
-import { GAMES, type Game } from '@/data/games';
+import { formatDuration, formatPlayers, type Game } from '@/data/games';
 import { useContentStyle } from '@/hooks/useContentStyle';
 import { useFavorites } from '@/store/favorites';
+import { useGames } from '@/store/games';
 import { useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
-import { normalizeSearch } from '@/utils/text';
+import { DURATION_FILTERS, PLAYER_FILTERS, SORT_LABELS, filterAndSortGames, matchesQuery, type GameSort } from '@/utils/gameList';
 
 export default function GamesScreen() {
   const contentStyle = useContentStyle();
   const { matches } = useMatches();
+  const { library } = useGames();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [sort, setSort] = useState<GameSort>('favorites');
+  const [players, setPlayers] = useState<number | null>(null);
+  const [maxDuration, setMaxDuration] = useState<number | null>(null);
   // Pendant une recherche, le logo laisse la place aux résultats, au-dessus du clavier
   const searching = searchFocused || query !== '';
 
-  const matchesSearch = (game: Game) => normalizeSearch(game.name).includes(normalizeSearch(query));
-  // Favoris d'abord, chaque groupe dans l'ordre du catalogue
-  const games = GAMES.filter(matchesSearch).sort((a, b) => Number(isFavorite(b.id)) - Number(isFavorite(a.id)));
+  const activeFilters = Number(players !== null) + Number(maxDuration !== null);
+  const games = filterAndSortGames(library, matches, isFavorite, { query, sort, players, maxDuration });
+
+  const resetFilters = () => {
+    setQuery('');
+    setPlayers(null);
+    setMaxDuration(null);
+  };
 
   return (
     <>
@@ -69,46 +82,114 @@ export default function GamesScreen() {
                 </Pressable>
               )}
             </View>
-            <OngoingMatches filter={matchesSearch} />
-            {games.length > 0 && <Text style={common.sectionTitle}>Jeux</Text>}
-          </View>
-        }
-        ListFooterComponent={
-          <Pressable accessibilityRole="link" onPress={() => router.push('/about')} style={styles.footer} hitSlop={8}>
-            <Text style={styles.footerText}>À propos · Mises à jour</Text>
-          </Pressable>
-        }
-        ListEmptyComponent={<Text style={common.subtitle}>Aucun jeu ne correspond à « {query.trim()} ».</Text>}
-        renderItem={({ item: game }) => {
-          const count = matches.filter((match) => match.gameId === game.id).length;
-          const favorite = isFavorite(game.id);
-          return (
-            <Pressable
-              onPress={() => router.push({ pathname: '/games/[id]', params: { id: game.id } })}
-              style={({ pressed }) => [common.card, styles.row, pressed && styles.pressed]}
-            >
-              <Text style={styles.emoji}>{game.emoji}</Text>
-              <View style={styles.info}>
-                <Text style={common.title}>{game.name}</Text>
-                <Text style={common.subtitle}>
-                  {game.players} · {game.duration}
-                </Text>
-              </View>
-              {count > 0 && <Text style={styles.badge}>{count}</Text>}
+            <OngoingMatches filter={(game) => matchesQuery(game, query)} />
+
+            <View style={styles.listHeader}>
+              <Text style={common.sectionTitle}>Ma bibliothèque</Text>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={favorite ? `Retirer ${game.name} des favoris` : `Ajouter ${game.name} aux favoris`}
-                accessibilityState={{ selected: favorite }}
-                hitSlop={12}
-                onPress={() => toggleFavorite(game.id)}
+                accessibilityState={{ expanded: showFilters }}
+                hitSlop={8}
+                onPress={() => setShowFilters((current) => !current)}
               >
-                <Text style={[styles.star, favorite && styles.starOn]}>{favorite ? '★' : '☆'}</Text>
+                <Text style={styles.filtersToggle}>
+                  Trier et filtrer{activeFilters > 0 ? ` (${activeFilters})` : ''} {showFilters ? '▴' : '▾'}
+                </Text>
               </Pressable>
+            </View>
+            {showFilters && (
+              <View style={[common.card, styles.filters]}>
+                <Text style={styles.filterLabel}>Trier par</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+                  {(Object.keys(SORT_LABELS) as GameSort[]).map((value) => (
+                    <Chip key={value} label={SORT_LABELS[value]} selected={sort === value} onPress={() => setSort(value)} />
+                  ))}
+                </ScrollView>
+                <Text style={styles.filterLabel}>Nombre de joueurs</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+                  <Chip label="Tous" selected={players === null} onPress={() => setPlayers(null)} />
+                  {PLAYER_FILTERS.map((value) => (
+                    <Chip
+                      key={value}
+                      label={value === PLAYER_FILTERS[PLAYER_FILTERS.length - 1] ? `${value}+` : String(value)}
+                      selected={players === value}
+                      onPress={() => setPlayers(value)}
+                    />
+                  ))}
+                </ScrollView>
+                <Text style={styles.filterLabel}>Durée</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+                  <Chip label="Toutes" selected={maxDuration === null} onPress={() => setMaxDuration(null)} />
+                  {DURATION_FILTERS.map((value) => (
+                    <Chip key={value} label={`≤ ${value} min`} selected={maxDuration === value} onPress={() => setMaxDuration(value)} />
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+          </View>
+        }
+        ListEmptyComponent={
+          library.length === 0 ? (
+            <Text style={common.subtitle}>Ta bibliothèque est vide : ajoute des jeux depuis le catalogue ou crée les tiens.</Text>
+          ) : (
+            <View style={styles.empty}>
+              <Text style={common.subtitle}>Aucun jeu ne correspond à ta recherche ou à tes filtres.</Text>
+              <Button label="Réinitialiser" variant="secondary" onPress={resetFilters} />
+            </View>
+          )
+        }
+        ListFooterComponent={
+          <View style={styles.footer}>
+            <Button label="➕  Ajouter des jeux" variant="secondary" onPress={() => router.push('/library')} />
+            <Pressable accessibilityRole="link" onPress={() => router.push('/about')} style={styles.about} hitSlop={8}>
+              <Text style={styles.footerText}>À propos · Mises à jour</Text>
             </Pressable>
-          );
-        }}
+          </View>
+        }
+        renderItem={({ item: game }) => (
+          <GameRow
+            game={game}
+            playedCount={matches.filter((match) => match.gameId === game.id).length}
+            favorite={isFavorite(game.id)}
+            onToggleFavorite={() => toggleFavorite(game.id)}
+          />
+        )}
       />
     </>
+  );
+}
+
+type GameRowProps = {
+  game: Game;
+  playedCount: number;
+  favorite: boolean;
+  onToggleFavorite: () => void;
+};
+
+function GameRow({ game, playedCount, favorite, onToggleFavorite }: GameRowProps) {
+  return (
+    <Pressable
+      onPress={() => router.push({ pathname: '/games/[id]', params: { id: game.id } })}
+      style={({ pressed }) => [common.card, styles.row, pressed && styles.pressed]}
+    >
+      <Text style={styles.emoji}>{game.emoji}</Text>
+      <View style={styles.info}>
+        <Text style={common.title}>{game.name}</Text>
+        <Text style={common.subtitle}>
+          {formatPlayers(game)} · {formatDuration(game)}
+        </Text>
+      </View>
+      {playedCount > 0 && <Text style={styles.badge}>{playedCount}</Text>}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={favorite ? `Retirer ${game.name} des favoris` : `Ajouter ${game.name} aux favoris`}
+        accessibilityState={{ selected: favorite }}
+        hitSlop={12}
+        onPress={onToggleFavorite}
+      >
+        <Text style={[styles.star, favorite && styles.starOn]}>{favorite ? '★' : '☆'}</Text>
+      </Pressable>
+    </Pressable>
   );
 }
 
@@ -122,11 +203,18 @@ const styles = StyleSheet.create({
   search: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   searchInput: { flex: 1 },
   clear: { fontSize: 18, color: colors.muted, paddingHorizontal: 4 },
+  listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 8 },
+  filtersToggle: { fontSize: 14, fontWeight: '600', color: colors.primary },
+  filters: { gap: 8 },
+  filterLabel: { fontSize: 12, color: colors.muted },
+  chips: { gap: 8 },
+  empty: { gap: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   pressed: { opacity: 0.7 },
   emoji: { fontSize: 34 },
   info: { flex: 1, gap: 2 },
-  footer: { alignSelf: 'center', paddingTop: 12 },
+  footer: { gap: 12, paddingTop: 4 },
+  about: { alignSelf: 'center' },
   footerText: { fontSize: 14, fontWeight: '600', color: colors.muted },
   star: { fontSize: 26, color: colors.muted },
   starOn: { color: colors.star },

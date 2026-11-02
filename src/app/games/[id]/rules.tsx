@@ -1,10 +1,11 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { getGame } from '@/data/games';
 import { useContentStyle } from '@/hooks/useContentStyle';
+import { useGames } from '@/store/games';
 import { colors, common } from '@/theme';
 
 export default function RulesScreen() {
+  const { getGame } = useGames();
   const contentStyle = useContentStyle();
   const { id } = useLocalSearchParams<{ id: string }>();
   const game = getGame(id);
