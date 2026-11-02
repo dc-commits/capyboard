@@ -714,6 +714,70 @@ export const BUILT_IN_GAMES: Game[] = [
       },
     ],
   },
+  {
+    id: 'service-compris',
+    name: 'Service compris !',
+    emoji: '🍽️',
+    minPlayers: 3,
+    maxPlayers: 6,
+    durationMinutes: 45,
+    // Jeu d'élimination : le dernier peuple encore en jeu gagne, il n'y a pas de score
+    winner: 'highest',
+    scoreless: true,
+    endCondition: { type: 'manual' },
+    endDescription: 'quand il ne reste plus qu’un peuple (ou aucun)',
+    rules: [
+      {
+        title: 'But du jeu',
+        body: 'Chaque joueur est le chef d’une tribu capturée par un géant affamé. Livrez les personnages adverses au géant et sauvez les vôtres : le dernier peuple qui n’a pas été entièrement dévoré gagne.',
+      },
+      {
+        title: 'Matériel',
+        items: [
+          'Un plateau : la table du géant, avec son assiette et sa poubelle.',
+          '6 peuples de 9 cartes (un chef et 8 membres) : Citrouilles, Dryades, Gobelins, Orcs, Sorcières et Trolls.',
+          '56 cartes action : attaque (rouges), sauvegarde (vertes) et contre (bleues).',
+        ],
+      },
+      {
+        title: 'Mise en place',
+        items: [
+          'Chacun choisit un peuple et pose ses 9 personnages face visible devant lui.',
+          'Le donneur distribue 5 cartes action à chacun ; le reste forme la pioche.',
+        ],
+      },
+      {
+        title: 'Tour de jeu',
+        items: [
+          'Le donneur commence, puis on joue dans le sens horaire.',
+          '1. Piocher une carte action.',
+          '2. En jouer une (attaque ou sauvegarde), avec ou sans effet ; elle est défaussée.',
+          'Un personnage livré au géant va sur sa table : le premier au plus près de l’assiette, les suivants derrière.',
+          'Une carte contre se joue pendant le tour d’un adversaire, une seule par action ; son joueur repioche aussitôt et le jeu reprend avec lui. On a toujours 5 cartes en main.',
+        ],
+      },
+      {
+        title: 'Le gueuleton',
+        items: [
+          'Le géant passe à table quand il y a plus de 5 personnages sur sa table, quand il reste moins de 7 personnages en jeu, ou quand on joue « Hors d’œuvre », « Goinfrerie » ou « Buffet à volonté ».',
+          'Dès le tour suivant, au début de chaque tour, il dévore le personnage le plus près de l’assiette (deux par tour après « Goinfrerie » ou « Buffet à volonté »).',
+          'Le repas s’arrête dès que sa table est vide. Les personnages dévorés vont à la poubelle et quittent la partie.',
+        ],
+      },
+      {
+        title: 'Cartes action',
+        items: [
+          'Attaque : livrer des personnages adverses au géant (« À table ! », « Plat du jour » au plus près de l’assiette, « Fromage et dessert » pour deux, « Panier garni » un chez chaque adversaire, « Choucroute melba » qui fait dévorer toute la table…).',
+          'Sauvegarde : reprendre des personnages sur la table du géant (« Retour en cuisine », « Vénéneux »), en échanger, réorganiser la table (« Chaud devant ») ou arrêter le repas.',
+          'Contre : annuler ou réduire une action adverse (« Surprise du chef », « Trop salé », « Le chef est parti », « Garde-manger »).',
+        ],
+      },
+      {
+        title: 'Fin de partie',
+        body: 'Un joueur est éliminé dès que son dernier personnage est dévoré, et ses cartes action sont défaussées. La partie s’arrête quand il ne reste plus qu’un peuple en jeu : il gagne. Si aucun ne survit, personne ne gagne.',
+      },
+    ],
+  },
 ];
 
 export function formatPlayers(game: Pick<Game, 'minPlayers' | 'maxPlayers'>): string {
