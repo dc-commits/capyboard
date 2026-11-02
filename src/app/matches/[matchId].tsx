@@ -1,14 +1,17 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { DetailedRoundEntry, formatDetail, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
 import { getGame } from '@/data/games';
+import { usePlayers } from '@/store/players';
 import { getEndReason, getProgress, getTieBreakerTotals, getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
 export default function MatchScreen() {
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
+  const { getPlayer } = usePlayers();
   const { matches, addRound, removeRound, finishMatch, resumeMatch, deleteMatch } = useMatches();
   const match = matches.find((candidate) => candidate.id === matchId);
   const game = match ? getGame(match.gameId) : undefined;
@@ -72,11 +75,17 @@ export default function MatchScreen() {
         <View style={common.card}>
           <View style={styles.row}>
             <Text style={[styles.cell, styles.roundCell, styles.head]}>#</Text>
-            {match.players.map((player, index) => (
-              <Text key={index} style={[styles.cell, styles.head]} numberOfLines={1}>
-                {player}
-              </Text>
-            ))}
+            {match.players.map((player, index) => {
+              const profile = match.playerIds && getPlayer(match.playerIds[index]);
+              return (
+                <View key={index} style={[styles.cell, styles.headCell]}>
+                  {profile && <Avatar avatar={profile.avatar} color={profile.color} size={28} />}
+                  <Text style={styles.head} numberOfLines={1}>
+                    {player}
+                  </Text>
+                </View>
+              );
+            })}
           </View>
 
           {match.rounds.map((round, roundIndex) => (
@@ -182,7 +191,8 @@ const styles = StyleSheet.create({
   totalRow: { paddingTop: 10, marginTop: 4, borderTopWidth: 2, borderTopColor: colors.text },
   cell: { flex: 1, textAlign: 'center', fontSize: 16, color: colors.text },
   roundCell: { flex: 0, width: 28 },
-  head: { fontWeight: '700', paddingBottom: 6 },
+  head: { fontWeight: '700', paddingBottom: 6, fontSize: 16, color: colors.text },
+  headCell: { alignItems: 'center', gap: 4 },
   muted: { color: colors.muted },
   scoreInput: { minWidth: 0, paddingHorizontal: 4, paddingVertical: 8 },
   total: { fontWeight: '700', fontSize: 18 },

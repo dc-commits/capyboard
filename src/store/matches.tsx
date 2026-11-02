@@ -1,13 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { EndCondition, Game, RoundDetail, TieBreaker } from '@/data/games';
+import type { Player } from '@/store/players';
+import { createId } from '@/utils/id';
 
 export type Match = {
   id: string;
   gameId: string;
   createdAt: string;
   finishedAt: string | null;
+  /** Noms des joueurs au moment de la partie */
   players: string[];
+  /** Profils des joueurs, même ordre que `players` (absent sur les parties d'avant les profils) */
+  playerIds?: string[];
   /** Une ligne par manche, un score par joueur (même ordre que `players`) */
   rounds: number[][];
   /** Saisie détaillée (jeux avec `scoring`) : même forme que `rounds`, les valeurs saisies au lieu du score */
@@ -17,7 +22,7 @@ export type Match = {
 type MatchesContextValue = {
   matches: Match[];
   loaded: boolean;
-  createMatch: (gameId: string, players: string[]) => Match;
+  createMatch: (gameId: string, players: Pick<Player, 'id' | 'name'>[]) => Match;
   /** Ajoute une manche et termine la partie si la condition de fin est atteinte */
   addRound: (matchId: string, round: { scores: number[]; details?: RoundDetail[] }, endCondition: EndCondition) => void;
   /** Supprime une manche ; la partie redevient en cours */
@@ -25,6 +30,8 @@ type MatchesContextValue = {
   finishMatch: (matchId: string) => void;
   resumeMatch: (matchId: string) => void;
   deleteMatch: (matchId: string) => void;
+  /** Répercute le nouveau nom d'un profil dans ses parties */
+  renamePlayer: (playerId: string, name: string) => void;
 };
 
 const STORAGE_KEY = 'capyboard/matches/v1';
@@ -57,11 +64,12 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
       loaded,
       createMatch: (gameId, players) => {
         const match: Match = {
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          id: createId(),
           gameId,
           createdAt: new Date().toISOString(),
           finishedAt: null,
-          players,
+          players: players.map((player) => player.name),
+          playerIds: players.map((player) => player.id),
           rounds: [],
         };
         setMatches((current) => [match, ...current]);
@@ -87,6 +95,14 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
       finishMatch: (matchId) => updateMatch(matchId, (match) => ({ ...match, finishedAt: new Date().toISOString() })),
       resumeMatch: (matchId) => updateMatch(matchId, (match) => ({ ...match, finishedAt: null })),
       deleteMatch: (matchId) => setMatches((current) => current.filter((match) => match.id !== matchId)),
+      renamePlayer: (playerId, name) =>
+        setMatches((current) =>
+          current.map((match) =>
+            match.playerIds?.includes(playerId)
+              ? { ...match, players: match.players.map((player, index) => (match.playerIds?.[index] === playerId ? name : player)) }
+              : match,
+          ),
+        ),
     }),
     [matches, loaded, updateMatch],
   );
