@@ -1,6 +1,8 @@
 export type RuleSection = {
   title: string;
-  body: string;
+  body?: string;
+  /** Liste à puces affichée sous le texte */
+  items?: string[];
 };
 
 export type Game = {
@@ -14,7 +16,7 @@ export type Game = {
   rules: RuleSection[];
 };
 
-// Les règles sont des résumés rédigés, pas les livrets officiels.
+// Les règles sont des résumés rédigés d'après les livrets officiels, pas des copies.
 export const GAMES: Game[] = [
   {
     id: 'skyjo',
@@ -26,23 +28,46 @@ export const GAMES: Game[] = [
     rules: [
       {
         title: 'But du jeu',
-        body: "Finir la partie avec le moins de points possible. La partie s'arrête dès qu'un joueur atteint 100 points en fin de manche.",
+        body: 'Avoir le moins de points possible. La partie se joue en plusieurs manches et s’arrête à la fin de la manche où un joueur atteint ou dépasse 100 points. Le plus petit total gagne.',
+      },
+      {
+        title: 'Matériel',
+        body: '150 cartes de −2 à 12 :',
+        items: ['5 cartes −2', '10 cartes −1', '15 cartes 0', '10 cartes de chaque valeur de 1 à 12'],
       },
       {
         title: 'Mise en place',
-        body: 'Chaque joueur reçoit 12 cartes face cachée, disposées en 3 lignes de 4. Il en retourne 2 au hasard. Le joueur avec le plus gros total commence.',
+        items: [
+          'Mélanger et distribuer 12 cartes face cachée à chaque joueur.',
+          'Chacun pose ses cartes en grille de 3 lignes × 4 colonnes, sans les regarder.',
+          'Le reste forme la pioche ; retourner la première carte pour lancer la défausse.',
+          'Chaque joueur retourne 2 cartes de son choix.',
+          'Première manche : celui dont les 2 cartes font le plus gros total commence. Ensuite, c’est celui qui a terminé la manche précédente.',
+        ],
       },
       {
         title: 'Tour de jeu',
-        body: "Prendre la carte de la défausse ou de la pioche. On peut l'échanger avec une de ses cartes (la carte remplacée part à la défausse), ou défausser la carte piochée et retourner une de ses cartes cachées.",
+        body: 'On joue dans le sens horaire. À son tour, on choisit une option :',
+        items: [
+          'Prendre la carte du dessus de la défausse et l’échanger avec une carte de sa grille (visible ou cachée). La carte remplacée part face visible sur la défausse.',
+          'Piocher une carte, la regarder, puis soit l’échanger avec une carte de sa grille, soit la défausser et retourner une de ses cartes cachées.',
+        ],
       },
       {
         title: 'Colonnes',
-        body: 'Trois cartes identiques et visibles dans une même colonne sont défaussées : elles ne comptent plus.',
+        body: 'Dès que les 3 cartes d’une colonne sont visibles et identiques, on les défausse : elles ne comptent plus et la grille rétrécit.',
       },
       {
         title: 'Fin de manche',
-        body: "Quand un joueur a retourné toutes ses cartes, les autres jouent un dernier tour. Si celui qui a fini n'a pas strictement le plus petit score de la manche, ses points sont doublés.",
+        items: [
+          'Quand un joueur a retourné toutes ses cartes, chacun des autres joue encore un dernier tour.',
+          'Tout le monde retourne alors ses cartes cachées et additionne sa grille.',
+          'Si le joueur qui a terminé n’a pas strictement le plus petit score de la manche, son score est doublé (seulement s’il est positif).',
+        ],
+      },
+      {
+        title: 'Fin de partie',
+        body: 'On additionne les manches. Dès qu’un joueur atteint 100 points en fin de manche, la partie s’arrête : le plus petit total l’emporte.',
       },
     ],
   },
@@ -56,19 +81,73 @@ export const GAMES: Game[] = [
     rules: [
       {
         title: 'But du jeu',
-        body: 'Avoir le plus de points après deux manches, en ramassant des pastèques et des collections Fiesta, tout en gardant sa zénitude au plus près de zéro.',
+        body: 'Marquer le plus de points en deux manches. Il y a trois façons de scorer :',
+        items: [
+          'Récolter des pastèques (1 point chacune).',
+          'Faire une collection de cartes Fiesta (plus on en a, plus ça rapporte).',
+          'Garder la somme de ses cartes la plus proche de zéro (l’écart coûte des points).',
+        ],
       },
       {
-        title: 'Tour de jeu',
-        body: "On révèle au centre autant de cartes Zen qu'il y a de joueurs. Chacun choisit en secret une de ses 3 cartes Capybara, puis tout le monde la révèle en même temps. Du plus grand numéro au plus petit, chaque joueur prend une carte au centre.",
+        title: 'Matériel',
+        items: [
+          '72 cartes Zen, en paquets de 12 d’une même couleur, valeurs de −6 à +6. Certaines montrent 1 à 3 pastèques.',
+          '72 cartes Capybara : 6 paquets de 12 cartes numérotées de 1 à 72. Chaque numéro est unique, donc jamais d’égalité.',
+          '12 cartes Fiesta, valeurs de −6 à +6.',
+          '1 carte mémo pour le décompte des Fiesta.',
+        ],
       },
       {
-        title: 'Manches',
-        body: 'Une manche dure douze tours. La partie se joue en deux manches, en échangeant les paquets entre les deux.',
+        title: 'Mise en place',
+        items: [
+          'Mélanger autant de paquets Zen que de joueurs (3 joueurs = 3 couleurs…), y ajouter les cartes Fiesta et poser la pioche face cachée.',
+          'À 2 joueurs, retirer les Fiesta −2, −1, +1 et +2. À 3 joueurs, retirer les Fiesta −1 et +1.',
+          'Chaque joueur prend un paquet Capybara, le mélange, le pose face cachée devant lui et pioche 3 cartes : c’est sa main.',
+        ],
+      },
+      {
+        title: 'Déroulement d’un tour',
+        body: 'Pas de premier joueur : tout le monde joue en même temps. Une manche dure 12 tours.',
+        items: [
+          '1. Révéler au centre autant de cartes de la pioche qu’il y a de joueurs.',
+          '2. Chacun choisit secrètement une de ses 3 cartes Capybara et la pose face cachée.',
+          '3. On révèle toutes les Capybara ensemble. Du plus grand numéro au plus petit, chaque joueur prend une carte au centre et la pose face visible devant lui (pas dans sa main).',
+          '4. Chacun pose sa Capybara jouée sur sa défausse personnelle, annonce sa nouvelle somme, puis pioche la carte du dessus de son propre paquet Capybara pour revenir à 3 cartes.',
+        ],
+      },
+      {
+        title: 'Cartes Fiesta',
+        body: 'Elles ont aussi une valeur de −6 à +6 qui compte dans la somme. Bonus selon le nombre de Fiesta :',
+        items: [
+          '1 carte : 1 point',
+          '2 cartes : 3 points',
+          '3 cartes : 6 points',
+          '4 cartes : 10 points',
+          '5 cartes : 15 points',
+          'Puis +5 points par carte supplémentaire',
+        ],
       },
       {
         title: 'Score de manche',
-        body: "Pastèques + collections Fiesta − écart à zéro. Trop positif comme trop négatif, l'écart coûte des points : il faut rester zen !",
+        body: 'Après 12 tours, chaque joueur calcule :',
+        items: [
+          'Somme de ses cartes : on perd autant de points que l’écart à 0 (+5 ou −3 → on perd 5 ou 3 points).',
+          '+1 point par pastèque.',
+          '+ le bonus de sa collection Fiesta.',
+          'Astuce : ranger ses cartes en une colonne positive et une colonne négative pour suivre sa somme.',
+        ],
+      },
+      {
+        title: 'Deuxième manche',
+        items: [
+          'On échange les paquets Capybara : le meilleur score de la manche échange avec le moins bon, le 2e avec l’avant-dernier, etc. En nombre impair, le joueur du milieu garde son paquet.',
+          'On remélange toutes les cartes Zen et Fiesta pour refaire la pioche.',
+        ],
+      },
+      {
+        title: 'Fin de partie',
+        body: 'On additionne les deux manches : le plus haut total gagne. En cas d’égalité, on départage dans l’ordre par :',
+        items: ['le plus petit écart à zéro', 'le plus de pastèques', 'le plus de points de collection Fiesta'],
       },
     ],
   },
@@ -82,23 +161,78 @@ export const GAMES: Game[] = [
     rules: [
       {
         title: 'But du jeu',
-        body: 'Être le premier à atteindre 200 points. On finit la manche en cours, et le plus haut total gagne.',
+        body: 'Jeu de « stop ou encore » : être le premier à atteindre 200 points. À chaque manche, on retourne des cartes pour cumuler des points, mais un numéro en double fait tout perdre.',
+      },
+      {
+        title: 'Matériel',
+        body: '94 cartes :',
+        items: [
+          'Cartes numéro de 0 à 12 : autant d’exemplaires que leur valeur (douze 12, onze 11… un 1) et un seul 0.',
+          'Cartes action : Freeze, Flip Three, Second Chance.',
+          'Cartes bonus : +2, +4, +6, +8, +10 et ×2.',
+          'Au-delà de 18 joueurs, ajouter un second paquet.',
+        ],
+      },
+      {
+        title: 'Mise en place',
+        items: [
+          'Bien mélanger et désigner un donneur.',
+          'Le donneur distribue une carte face visible à chacun, lui compris. Si une carte action sort, on s’arrête pour la résoudre, puis on reprend.',
+          'Après la donne, certains peuvent avoir plusieurs cartes, d’autres aucune.',
+        ],
       },
       {
         title: 'Tour de jeu',
-        body: "À son tour, on retourne une carte devant soi ou on s'arrête pour encaisser ses points. Si on retourne un numéro qu'on a déjà, on saute : zéro point pour la manche.",
+        body: 'Le donneur propose à chaque joueur actif, dans l’ordre :',
+        items: [
+          'Hit (encore) : recevoir une carte de plus. Les numéros vont en ligne, les bonus au-dessus.',
+          'Stay (stop) : sortir de la manche en encaissant ses points (possible dès qu’on a une carte devant soi).',
+          'Si on reçoit un numéro qu’on a déjà : on saute (bust), on sort de la manche et on marque 0.',
+        ],
       },
       {
         title: 'Flip 7',
-        body: 'Réunir 7 numéros différents met fin immédiatement à la manche et rapporte 15 points de bonus.',
+        body: 'Avoir 7 numéros différents devant soi termine immédiatement la manche pour tout le monde et rapporte 15 points de bonus. Les cartes action et bonus ne comptent pas dans les 7 ; le 0 compte.',
       },
       {
         title: 'Cartes action',
-        body: 'Freeze : le joueur ciblé encaisse et sort de la manche. Flip Three : il doit retourner trois cartes. Second Chance : annule un doublon (on défausse le doublon et la carte), une seule à la fois.',
+        body: 'Elles se jouent sur n’importe quel joueur actif, soi-même compris (obligatoirement soi-même si on est le seul actif).',
+        items: [
+          'Freeze : le joueur ciblé encaisse ses points et sort de la manche.',
+          'Flip Three : le joueur ciblé doit accepter les 3 cartes suivantes, une par une. On s’arrête plus tôt s’il saute ou réussit un Flip 7. Une Freeze ou Flip Three tirée pendant ce temps se résout après les 3 cartes (s’il n’a pas sauté).',
+          'Second Chance : à garder. Si on reçoit un doublon, on défausse le doublon et la Second Chance. Une seule à la fois : une deuxième se donne à un autre joueur actif (ou se défausse). Les Second Chance non utilisées sont défaussées en fin de manche.',
+        ],
       },
       {
-        title: 'Décompte',
-        body: 'On additionne ses numéros, on double avec le ×2, puis on ajoute les bonus (+2 à +10). Le ×2 ne double pas les bonus.',
+        title: 'Cartes bonus',
+        body: 'Ce ne sont pas des numéros : on ne peut pas sauter dessus et elles ne comptent pas pour le Flip 7.',
+        items: [
+          '+2 à +10 : s’ajoutent à la somme des numéros. On marque ces points même sans numéro.',
+          '×2 : double la somme des numéros (pas les autres bonus).',
+        ],
+      },
+      {
+        title: 'Fin de manche et score',
+        body: 'La manche s’arrête quand plus personne n’est actif, ou dès qu’un joueur réussit un Flip 7. Calcul du score :',
+        items: [
+          '1. Additionner ses numéros.',
+          '2. Doubler si on a le ×2.',
+          '3. Ajouter les bonus +2 à +10.',
+          '4. Ajouter 15 points en cas de Flip 7.',
+          'Un joueur qui a sauté marque 0.',
+        ],
+      },
+      {
+        title: 'Manche suivante',
+        items: [
+          'Mettre de côté les cartes jouées, sans les remélanger.',
+          'Le paquet passe au joueur de gauche, qui devient donneur.',
+          'Quand la pioche est vide, mélanger les cartes mises de côté. En cours de manche, on laisse les cartes devant les joueurs.',
+        ],
+      },
+      {
+        title: 'Fin de partie',
+        body: 'À la fin de la manche où au moins un joueur atteint 200 points, le plus haut total gagne.',
       },
     ],
   },
