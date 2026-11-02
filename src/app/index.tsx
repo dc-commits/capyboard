@@ -15,6 +15,9 @@ export default function GamesScreen() {
   const { matches } = useMatches();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [query, setQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+  // Pendant une recherche, le logo laisse la place aux résultats, au-dessus du clavier
+  const searching = searchFocused || query !== '';
 
   const matchesSearch = (game: Game) => normalizeSearch(game.name).includes(normalizeSearch(query));
   // Favoris d'abord, chaque groupe dans l'ordre du catalogue
@@ -40,11 +43,13 @@ export default function GamesScreen() {
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View style={styles.header}>
-            <View style={styles.hero}>
-              <Image source={require('../../assets/logo.png')} style={styles.logo} accessibilityIgnoresInvertColors />
-              <Text style={styles.appName}>Capy Board</Text>
-              <Text style={[common.subtitle, styles.tagline]}>Les règles et les scores de vos jeux, en toute zénitude</Text>
-            </View>
+            {!searching && (
+              <View style={styles.hero}>
+                <Image source={require('../../assets/logo.png')} style={styles.logo} accessibilityIgnoresInvertColors />
+                <Text style={styles.appName}>Capy Board</Text>
+                <Text style={[common.subtitle, styles.tagline]}>Les règles et les scores de vos jeux, en toute zénitude</Text>
+              </View>
+            )}
             <UpdateBanner />
             <View style={styles.search}>
               <TextInput
@@ -53,6 +58,8 @@ export default function GamesScreen() {
                 placeholderTextColor={colors.muted}
                 value={query}
                 onChangeText={setQuery}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
                 autoCorrect={false}
                 returnKeyType="search"
               />
