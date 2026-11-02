@@ -2,7 +2,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { getGame } from '@/data/games';
-import { getLeaders, getTotals, useMatches } from '@/store/matches';
+import { getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
 export default function GameScreen() {
@@ -37,7 +37,7 @@ export default function GameScreen() {
       {gameMatches.length === 0 && <Text style={common.subtitle}>Aucune partie pour l’instant.</Text>}
       {gameMatches.map((match) => {
         const totals = getTotals(match);
-        const leaders = getLeaders(match, game.winner);
+        const { leaders } = getWinners(match, game);
         return (
           <Pressable
             key={match.id}

@@ -5,6 +5,35 @@ export type RuleSection = {
   items?: string[];
 };
 
+/** Valeurs saisies pour un joueur sur une manche, par clé de champ */
+export type RoundDetail = Record<string, number>;
+
+export type ScoreField = {
+  key: string;
+  label: string;
+  icon: string;
+  /** Accepte les valeurs négatives */
+  signed: boolean;
+};
+
+export type TieBreaker = {
+  label: string;
+  icon: string;
+  better: 'highest' | 'lowest';
+  /** Unité affichée après le total (ex. « pts » quand le champ saisi est un nombre de cartes) */
+  unit?: string;
+  /** Valeur d'une manche, additionnée sur toute la partie */
+  value: (detail: RoundDetail) => number;
+};
+
+/** Saisie détaillée : le score de manche est calculé à partir de plusieurs champs */
+export type DetailedScoring = {
+  fields: ScoreField[];
+  compute: (detail: RoundDetail) => number;
+  /** Critères de départage en cas d'égalité, appliqués dans l'ordre */
+  tieBreakers: TieBreaker[];
+};
+
 export type Game = {
   id: string;
   name: string;
@@ -13,8 +42,16 @@ export type Game = {
   duration: string;
   /** Qui gagne : le plus haut total ou le plus bas */
   winner: 'highest' | 'lowest';
+  /** Sans ce champ, on saisit directement un score par joueur et par manche */
+  scoring?: DetailedScoring;
   rules: RuleSection[];
 };
+
+/** Capybaraka : 1, 3, 6, 10, 15 points pour 1 à 5 cartes Fiesta, puis +5 par carte */
+export function capybarakaFiestaPoints(cards: number): number {
+  const table = [0, 1, 3, 6, 10, 15];
+  return cards < table.length ? table[cards] : 15 + (cards - 5) * 5;
+}
 
 // Les règles sont des résumés rédigés d'après les livrets officiels, pas des copies.
 export const GAMES: Game[] = [
@@ -78,6 +115,25 @@ export const GAMES: Game[] = [
     players: '2 à 6 joueurs',
     duration: '20 min',
     winner: 'highest',
+    scoring: {
+      fields: [
+        { key: 'sum', label: 'Somme', icon: '🧘', signed: true },
+        { key: 'watermelons', label: 'Pastèques', icon: '🍉', signed: false },
+        { key: 'fiesta', label: 'Fiesta', icon: '🎉', signed: false },
+      ],
+      compute: ({ sum, watermelons, fiesta }) => watermelons + capybarakaFiestaPoints(fiesta) - Math.abs(sum),
+      tieBreakers: [
+        { label: 'le plus petit écart à zéro', icon: '🧘', better: 'lowest', value: ({ sum }) => Math.abs(sum) },
+        { label: 'le plus de pastèques', icon: '🍉', better: 'highest', value: ({ watermelons }) => watermelons },
+        {
+          label: 'le plus de points Fiesta',
+          icon: '🎉',
+          better: 'highest',
+          unit: 'pts',
+          value: ({ fiesta }) => capybarakaFiestaPoints(fiesta),
+        },
+      ],
+    },
     rules: [
       {
         title: 'But du jeu',

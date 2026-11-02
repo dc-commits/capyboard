@@ -2,8 +2,9 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button } from '@/components/Button';
+import { DetailedRoundEntry, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
 import { getGame } from '@/data/games';
-import { getLeaders, getTotals, useMatches } from '@/store/matches';
+import { getTieBreakerTotals, getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
 export default function MatchScreen() {
@@ -12,18 +13,38 @@ export default function MatchScreen() {
   const match = matches.find((candidate) => candidate.id === matchId);
   const game = match ? getGame(match.gameId) : undefined;
   const [draft, setDraft] = useState<string[]>([]);
+  const [detailDraft, setDetailDraft] = useState<DetailDraft>([]);
 
   if (!match || !game) return <Text style={common.content}>Partie introuvable</Text>;
 
   const totals = getTotals(match);
-  const leaders = getLeaders(match, game.winner);
+  const { leaders, decidedBy } = getWinners(match, game);
+  const { scoring } = game;
+
+  // Saisie simple : un score par joueur
   const values = match.players.map((_, index) => draft[index] ?? '');
   const parsed = values.map((value) => Number(value.replace(',', '.')));
-  const canAdd = values.every((value) => value.trim() !== '') && parsed.every((value) => Number.isFinite(value));
+  const canAddSimple = values.every((value) => value.trim() !== '') && parsed.every((value) => Number.isFinite(value));
+
+  // Saisie détaillée : plusieurs champs par joueur, score calculé
+  const details = scoring ? match.players.map((_, index) => parseDetail(scoring, detailDraft[index])) : [];
+  const completeDetails = details.every((detail) => detail !== null) ? details.filter((detail) => detail !== null) : null;
+
+  const canAdd = scoring ? completeDetails !== null : canAddSimple;
 
   const submitRound = () => {
-    addRound(match.id, parsed);
-    setDraft([]);
+    if (scoring) {
+      if (!completeDetails) return;
+      addRound(
+        match.id,
+        completeDetails.map((detail) => scoring.compute(detail)),
+        completeDetails,
+      );
+      setDetailDraft([]);
+    } else {
+      addRound(match.id, parsed);
+      setDraft([]);
+    }
   };
 
   const confirmRemoveRound = (roundIndex: number) =>
@@ -64,15 +85,23 @@ export default function MatchScreen() {
               <Text style={[styles.cell, styles.roundCell, styles.muted]} onLongPress={() => confirmRemoveRound(roundIndex)}>
                 {roundIndex + 1}
               </Text>
-              {round.map((score, playerIndex) => (
-                <Text key={playerIndex} style={styles.cell} onLongPress={() => confirmRemoveRound(roundIndex)}>
-                  {score}
-                </Text>
-              ))}
+              {round.map((score, playerIndex) => {
+                const detail = match.details?.[roundIndex]?.[playerIndex];
+                return (
+                  <Text key={playerIndex} style={styles.cell} onLongPress={() => confirmRemoveRound(roundIndex)}>
+                    {score}
+                    {scoring && detail && (
+                      <Text style={styles.detail}>
+                        {'\n' + scoring.fields.map((field) => `${field.icon}${detail[field.key]}`).join(' ')}
+                      </Text>
+                    )}
+                  </Text>
+                );
+              })}
             </View>
           ))}
 
-          {!match.finishedAt && (
+          {!match.finishedAt && !scoring && (
             <View style={[styles.row, styles.roundRow]}>
               <Text style={[styles.cell, styles.roundCell, styles.muted]}>{match.rounds.length + 1}</Text>
               {values.map((value, index) => (
@@ -99,7 +128,30 @@ export default function MatchScreen() {
               </Text>
             ))}
           </View>
+
+          {scoring && match.details && match.details.length > 0 && (
+            <View style={styles.row}>
+              <Text style={[styles.cell, styles.roundCell]} />
+              {match.players.map((_, playerIndex) => (
+                <Text key={playerIndex} style={[styles.cell, styles.detail]}>
+                  {scoring.tieBreakers
+                    .map((tieBreaker) => `${tieBreaker.icon}${getTieBreakerTotals(match, tieBreaker)[playerIndex]}${tieBreaker.unit ?? ''}`)
+                    .join(' ')}
+                </Text>
+              ))}
+            </View>
+          )}
         </View>
+
+        {scoring && !match.finishedAt && (
+          <DetailedRoundEntry
+            scoring={scoring}
+            players={match.players}
+            roundNumber={match.rounds.length + 1}
+            draft={detailDraft}
+            onChange={setDetailDraft}
+          />
+        )}
 
         {match.rounds.length > 0 && <Text style={styles.hint}>Appui long sur une manche pour la supprimer.</Text>}
 
@@ -118,6 +170,7 @@ export default function MatchScreen() {
             <Text style={common.title}>
               🏆 {leaders.map((index) => match.players[index]).join(' & ')} {leaders.length > 1 ? 'gagnent' : 'gagne'} !
             </Text>
+            {decidedBy && <Text style={common.subtitle}>Égalité départagée par {decidedBy}</Text>}
             <Text style={common.subtitle}>
               Partie terminée en {match.rounds.length} manche{match.rounds.length > 1 ? 's' : ''}
             </Text>
@@ -139,6 +192,7 @@ const styles = StyleSheet.create({
   muted: { color: colors.muted },
   scoreInput: { minWidth: 0, paddingHorizontal: 4, paddingVertical: 8 },
   total: { fontWeight: '700', fontSize: 18 },
+  detail: { fontSize: 11, fontWeight: '400', color: colors.muted },
   leader: { color: colors.success },
   hint: { fontSize: 13, color: colors.muted, textAlign: 'center' },
   result: { alignItems: 'center', gap: 4 },
