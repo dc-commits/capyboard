@@ -18,7 +18,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.dccommits.capyboard",
-      "versionCode": 1
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -44,6 +44,12 @@
         "projectId": "9c0bb927-d63a-41cc-9043-d5e14684ee20"
       }
     },
-    "owner": "tazmaniack"
+    "owner": "tazmaniack",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9c0bb927-d63a-41cc-9043-d5e14684ee20"
+    }
   }
 }
