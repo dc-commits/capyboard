@@ -417,12 +417,12 @@ export const GAMES: Game[] = [
       },
       {
         title: 'Combinaisons',
-        body: 'On peut poser une carte seule, ou plusieurs cartes de même valeur ou de même couleur. On lit leur valeur en accolant les chiffres du plus grand au plus petit :',
+        body: 'Plusieurs cartes posées ensemble doivent avoir la même valeur ou la même couleur. On lit leur valeur en accolant les chiffres du plus grand au plus petit :',
         items: ['2 et 8 → 82', '2, 4 et 9 → 942', 'trois 5 → 555'],
       },
       {
         title: 'Tour de jeu',
-        body: 'Celui qui lance le tour pose obligatoirement une combinaison. Ensuite, chacun à son tour :',
+        body: 'Celui qui lance le tour pose obligatoirement une seule carte, jamais plusieurs (sauf départ groupé, qui termine la manche). Ensuite, chacun à son tour :',
         items: [
           'Joue : pose autant de cartes qu’au centre, ou une de plus (jamais moins, jamais deux de plus), avec une valeur strictement supérieure.',
           'Puis reprend en main une des cartes qui étaient au centre ; les autres sont défaussées.',
@@ -431,7 +431,7 @@ export const GAMES: Game[] = [
       },
       {
         title: 'Fin d’un tour',
-        body: 'Quand tous les joueurs sauf un ont passé d’affilée, on défausse le centre. Le dernier à avoir posé lance le tour suivant avec la combinaison de son choix.',
+        body: 'Quand tous les joueurs sauf un ont passé d’affilée, on défausse le centre. Le dernier à avoir posé lance le tour suivant avec la carte de son choix (une seule).',
       },
       {
         title: 'Fin de manche',
