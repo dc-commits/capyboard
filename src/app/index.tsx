@@ -1,5 +1,6 @@
 import { Stack, router } from 'expo-router';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { OngoingMatches } from '@/components/OngoingMatches';
 import { GAMES } from '@/data/games';
 import { useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
@@ -25,10 +26,13 @@ export default function GamesScreen() {
         data={GAMES}
         keyExtractor={(game) => game.id}
         ListHeaderComponent={
-          <View style={styles.hero}>
-            <Image source={require('../../assets/logo.png')} style={styles.logo} accessibilityIgnoresInvertColors />
-            <Text style={styles.appName}>Capy Board</Text>
-            <Text style={[common.subtitle, styles.tagline]}>Les règles et les scores de vos jeux, en toute zénitude</Text>
+          <View style={styles.header}>
+            <View style={styles.hero}>
+              <Image source={require('../../assets/logo.png')} style={styles.logo} accessibilityIgnoresInvertColors />
+              <Text style={styles.appName}>Capy Board</Text>
+              <Text style={[common.subtitle, styles.tagline]}>Les règles et les scores de vos jeux, en toute zénitude</Text>
+            </View>
+            <OngoingMatches />
           </View>
         }
         renderItem={({ item: game }) => {
@@ -55,6 +59,7 @@ export default function GamesScreen() {
 }
 
 const styles = StyleSheet.create({
+  header: { gap: 8 },
   hero: { alignItems: 'center', gap: 4, paddingBottom: 8 },
   logo: { width: 112, height: 112 },
   tagline: { textAlign: 'center' },
