@@ -2,19 +2,21 @@ import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { useContentStyle } from '@/hooks/useContentStyle';
 import { useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { getPlayerStats } from '@/store/stats';
 import { common } from '@/theme';
 
 export default function PlayersScreen() {
+  const contentStyle = useContentStyle();
   const { players } = usePlayers();
   const { matches } = useMatches();
 
   return (
     <FlatList
       style={common.screen}
-      contentContainerStyle={common.content}
+      contentContainerStyle={contentStyle}
       data={players}
       keyExtractor={(player) => player.id}
       ListHeaderComponent={<Button label="+ Nouveau joueur" onPress={() => router.push('/players/new')} />}

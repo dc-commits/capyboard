@@ -4,11 +4,13 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { getGame } from '@/data/games';
+import { useContentStyle } from '@/hooks/useContentStyle';
 import { useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { colors, common } from '@/theme';
 
 export default function NewMatchScreen() {
+  const contentStyle = useContentStyle();
   const { id } = useLocalSearchParams<{ id: string }>();
   const game = getGame(id);
   const { matches, createMatch } = useMatches();
@@ -43,7 +45,7 @@ export default function NewMatchScreen() {
 
   return (
     <KeyboardAvoidingView style={common.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={common.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={contentStyle} keyboardShouldPersistTaps="handled">
         <Text style={common.title}>
           {game.emoji} {game.name}
         </Text>

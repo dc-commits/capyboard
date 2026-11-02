@@ -1,16 +1,18 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { getGame } from '@/data/games';
+import { useContentStyle } from '@/hooks/useContentStyle';
 import { colors, common } from '@/theme';
 
 export default function RulesScreen() {
+  const contentStyle = useContentStyle();
   const { id } = useLocalSearchParams<{ id: string }>();
   const game = getGame(id);
 
   if (!game) return <Text style={common.content}>Jeu introuvable</Text>;
 
   return (
-    <ScrollView style={common.screen} contentContainerStyle={common.content}>
+    <ScrollView style={common.screen} contentContainerStyle={contentStyle}>
       <Stack.Screen options={{ title: `Règles · ${game.name}` }} />
       {game.rules.map((section) => (
         <View key={section.title} style={[common.card, styles.section]}>

@@ -1,5 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import type { DetailedScoring, RoundDetail, ScoreField } from '@/data/games';
@@ -164,6 +165,7 @@ type Props = {
 
 export function DetailedRoundEntry({ scoring, players, avatars, roundNumber, draft, onChange }: Props) {
   const [openPlayer, setOpenPlayer] = useState<number | null>(null);
+  const { bottom } = useSafeAreaInsets();
   const round = players.map((_, index) => parseDetail(scoring, draft[index]));
 
   const update = (playerIndex: number, change: (values: Record<string, string>) => Record<string, string>) =>
@@ -254,7 +256,7 @@ export function DetailedRoundEntry({ scoring, players, avatars, roundNumber, dra
       <Modal visible={open !== undefined} transparent animationType="slide" onRequestClose={() => setOpenPlayer(null)}>
         <Pressable style={styles.backdrop} accessibilityLabel="Fermer" onPress={() => setOpenPlayer(null)} />
         {open !== undefined && (
-          <View style={styles.sheet}>
+          <View style={[styles.sheet, { paddingBottom: bottom + 16 }]}>
             <View style={styles.header}>
               <Text style={styles.sheetTitle} numberOfLines={1}>
                 {players[open]}
@@ -348,7 +350,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 16,
-    paddingBottom: 28,
     gap: 10,
     maxHeight: '85%',
   },

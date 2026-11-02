@@ -2,10 +2,12 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { getGame } from '@/data/games';
+import { useContentStyle } from '@/hooks/useContentStyle';
 import { getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
 export default function GameScreen() {
+  const contentStyle = useContentStyle();
   const { id } = useLocalSearchParams<{ id: string }>();
   const game = getGame(id);
   const { matches } = useMatches();
@@ -15,7 +17,7 @@ export default function GameScreen() {
   const gameMatches = matches.filter((match) => match.gameId === game.id);
 
   return (
-    <ScrollView style={common.screen} contentContainerStyle={common.content}>
+    <ScrollView style={common.screen} contentContainerStyle={contentStyle}>
       <Stack.Screen options={{ title: game.name }} />
       <View style={[common.card, styles.header]}>
         <Text style={styles.emoji}>{game.emoji}</Text>

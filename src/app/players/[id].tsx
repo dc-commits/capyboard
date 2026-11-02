@@ -4,6 +4,7 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, Vi
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { PlayerForm } from '@/components/PlayerForm';
+import { useContentStyle } from '@/hooks/useContentStyle';
 import { useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { getPlayerStats } from '@/store/stats';
@@ -23,6 +24,7 @@ function winRate(wins: number, played: number): string {
 }
 
 export default function PlayerScreen() {
+  const contentStyle = useContentStyle();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getPlayer, updatePlayer, deletePlayer } = usePlayers();
   const { matches, renamePlayer } = useMatches();
@@ -49,7 +51,7 @@ export default function PlayerScreen() {
   return (
     <KeyboardAvoidingView style={common.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Stack.Screen options={{ title: player.name }} />
-      <ScrollView contentContainerStyle={common.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={contentStyle} keyboardShouldPersistTaps="handled">
         {editing ? (
           <PlayerForm
             initial={player}

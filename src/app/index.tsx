@@ -2,10 +2,12 @@ import { Stack, router } from 'expo-router';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { OngoingMatches } from '@/components/OngoingMatches';
 import { GAMES } from '@/data/games';
+import { useContentStyle } from '@/hooks/useContentStyle';
 import { useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
 export default function GamesScreen() {
+  const contentStyle = useContentStyle();
   const { matches } = useMatches();
 
   return (
@@ -22,7 +24,7 @@ export default function GamesScreen() {
       />
       <FlatList
         style={common.screen}
-        contentContainerStyle={common.content}
+        contentContainerStyle={contentStyle}
         data={GAMES}
         keyExtractor={(game) => game.id}
         ListHeaderComponent={

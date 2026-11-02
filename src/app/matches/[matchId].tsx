@@ -5,11 +5,13 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { DetailedRoundEntry, formatDetail, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
 import { getGame } from '@/data/games';
+import { useContentStyle } from '@/hooks/useContentStyle';
 import { usePlayers } from '@/store/players';
 import { getEndReason, getProgress, getTieBreakerTotals, getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
 export default function MatchScreen() {
+  const contentStyle = useContentStyle();
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const { getPlayer } = usePlayers();
   const { matches, addRound, removeRound, finishMatch, resumeMatch, deleteMatch } = useMatches();
@@ -70,7 +72,7 @@ export default function MatchScreen() {
   return (
     <KeyboardAvoidingView style={common.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Stack.Screen options={{ title: `${game.emoji} ${game.name}` }} />
-      <ScrollView contentContainerStyle={common.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={contentStyle} keyboardShouldPersistTaps="handled">
         {!match.finishedAt && <Text style={styles.progress}>{getProgress(match, game)}</Text>}
         <View style={common.card}>
           <View style={styles.row}>
