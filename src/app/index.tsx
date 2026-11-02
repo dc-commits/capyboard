@@ -2,6 +2,7 @@ import { Stack, router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { OngoingMatches } from '@/components/OngoingMatches';
+import { UpdateBanner } from '@/components/UpdateBanner';
 import { GAMES, type Game } from '@/data/games';
 import { useContentStyle } from '@/hooks/useContentStyle';
 import { useFavorites } from '@/store/favorites';
@@ -44,6 +45,7 @@ export default function GamesScreen() {
               <Text style={styles.appName}>Capy Board</Text>
               <Text style={[common.subtitle, styles.tagline]}>Les règles et les scores de vos jeux, en toute zénitude</Text>
             </View>
+            <UpdateBanner />
             <View style={styles.search}>
               <TextInput
                 style={[common.input, styles.searchInput]}
@@ -63,6 +65,11 @@ export default function GamesScreen() {
             <OngoingMatches filter={matchesSearch} />
             {games.length > 0 && <Text style={common.sectionTitle}>Jeux</Text>}
           </View>
+        }
+        ListFooterComponent={
+          <Pressable accessibilityRole="link" onPress={() => router.push('/about')} style={styles.footer} hitSlop={8}>
+            <Text style={styles.footerText}>À propos · Mises à jour</Text>
+          </Pressable>
         }
         ListEmptyComponent={<Text style={common.subtitle}>Aucun jeu ne correspond à « {query.trim()} ».</Text>}
         renderItem={({ item: game }) => {
@@ -112,6 +119,8 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.7 },
   emoji: { fontSize: 34 },
   info: { flex: 1, gap: 2 },
+  footer: { alignSelf: 'center', paddingTop: 12 },
+  footerText: { fontSize: 14, fontWeight: '600', color: colors.muted },
   star: { fontSize: 26, color: colors.muted },
   starOn: { color: colors.star },
   badge: {

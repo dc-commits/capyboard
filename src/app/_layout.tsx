@@ -28,6 +28,7 @@ export default function RootLayout() {
             <Stack.Screen name="players/index" options={{ title: 'Joueurs' }} />
             <Stack.Screen name="players/new" options={{ title: 'Nouveau joueur', presentation: 'modal' }} />
             <Stack.Screen name="players/[id]" options={{ title: '' }} />
+            <Stack.Screen name="about" options={{ title: 'À propos' }} />
           </Stack>
         </FavoritesProvider>
       </MatchesProvider>
