@@ -386,6 +386,75 @@ export const GAMES: Game[] = [
       },
     ],
   },
+  {
+    id: 'odin',
+    name: 'Odin',
+    emoji: '🛡️',
+    players: '2 à 6 joueurs',
+    duration: '20 min',
+    winner: 'lowest',
+    endCondition: { type: 'threshold', points: 15 },
+    scoring: {
+      fields: [{ kind: 'number', key: 'cards', label: 'Cartes en main', icon: '✋', signed: false }],
+      compute: ({ cards }) => cards,
+      tieBreakers: [],
+    },
+    rules: [
+      {
+        title: 'But du jeu',
+        body: 'Se débarrasser de ses cartes le plus vite possible. Chaque carte restée en main en fin de manche coûte 1 point ; la partie s’arrête dès qu’un joueur atteint 15 points, et le plus petit total gagne.',
+      },
+      {
+        title: 'Matériel',
+        body: '54 cartes numérotées de 1 à 9, en 6 couleurs.',
+      },
+      {
+        title: 'Mise en place',
+        items: [
+          'Mélanger et distribuer 9 cartes à chaque joueur ; le reste est mis de côté pour la manche.',
+          'Le premier joueur est tiré au sort, puis on joue dans le sens horaire.',
+        ],
+      },
+      {
+        title: 'Combinaisons',
+        body: 'On peut poser une carte seule, ou plusieurs cartes de même valeur ou de même couleur. On lit leur valeur en accolant les chiffres du plus grand au plus petit :',
+        items: ['2 et 8 → 82', '2, 4 et 9 → 942', 'trois 5 → 555'],
+      },
+      {
+        title: 'Tour de jeu',
+        body: 'Celui qui lance le tour pose obligatoirement une combinaison. Ensuite, chacun à son tour :',
+        items: [
+          'Joue : pose autant de cartes qu’au centre, ou une de plus (jamais moins, jamais deux de plus), avec une valeur strictement supérieure.',
+          'Puis reprend en main une des cartes qui étaient au centre ; les autres sont défaussées.',
+          'Ou passe : il pourra rejouer à son prochain passage si le tour continue.',
+        ],
+      },
+      {
+        title: 'Fin d’un tour',
+        body: 'Quand tous les joueurs sauf un ont passé d’affilée, on défausse le centre. Le dernier à avoir posé lance le tour suivant avec la combinaison de son choix.',
+      },
+      {
+        title: 'Fin de manche',
+        items: [
+          'Main vide : poser sa dernière carte arrête la manche aussitôt, sans reprendre de carte au centre.',
+          'Départ groupé : en lançant un tour, si toutes ses cartes restantes ont la même valeur ou la même couleur, on les pose d’un coup et la manche s’arrête.',
+        ],
+      },
+      {
+        title: 'Décompte',
+        body: 'Chaque joueur marque 1 point par carte restée en main (0 pour celui qui a fini). On redistribue 9 cartes ; le joueur à gauche de celui qui avait commencé lance la manche suivante.',
+      },
+      {
+        title: 'Fin de partie',
+        body: 'Dès qu’un joueur atteint ou dépasse 15 points, la partie s’arrête : le plus petit total gagne. En cas d’égalité, les vainqueurs se partagent la victoire.',
+        items: [
+          'Partie courte : 10 points',
+          'Partie longue : 20 points ou plus',
+          'Partie express : une seule manche, le moins de cartes en main gagne',
+        ],
+      },
+    ],
+  },
 ];
 
 export function getGame(id: string): Game | undefined {
