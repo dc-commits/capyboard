@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
-import { getGame } from '@/data/games';
+import { getGame, type Game } from '@/data/games';
 import { getProgress, useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { colors, common } from '@/theme';
@@ -18,12 +18,20 @@ function startedLabel(createdAt: string): string {
 }
 
 /** Raccourcis vers les parties pas encore terminées, les plus récentes d'abord */
-export function OngoingMatches() {
+type Props = {
+  /** Ne garde que les parties des jeux retenus (recherche de l'accueil) */
+  filter?: (game: Game) => boolean;
+};
+
+export function OngoingMatches({ filter }: Props) {
   const { matches } = useMatches();
   const { getPlayer } = usePlayers();
 
   const ongoing = matches
-    .filter((match) => !match.finishedAt && getGame(match.gameId))
+    .filter((match) => {
+      const game = getGame(match.gameId);
+      return !match.finishedAt && game && (!filter || filter(game));
+    })
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   if (ongoing.length === 0) return null;
 
@@ -68,7 +76,6 @@ export function OngoingMatches() {
           Et {ongoing.length - MAX_SHOWN} autre{ongoing.length - MAX_SHOWN > 1 ? 's' : ''}, à retrouver dans la fiche de chaque jeu.
         </Text>
       )}
-      <Text style={common.sectionTitle}>Jeux</Text>
     </View>
   );
 }

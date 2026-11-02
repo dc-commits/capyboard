@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { getGame } from '@/data/games';
 import { useContentStyle } from '@/hooks/useContentStyle';
+import { useFavorites } from '@/store/favorites';
 import { getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
@@ -11,6 +12,7 @@ export default function GameScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const game = getGame(id);
   const { matches } = useMatches();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   if (!game) return <Text style={common.content}>Jeu introuvable</Text>;
 
@@ -18,7 +20,22 @@ export default function GameScreen() {
 
   return (
     <ScrollView style={common.screen} contentContainerStyle={contentStyle}>
-      <Stack.Screen options={{ title: game.name }} />
+      <Stack.Screen
+        options={{
+          title: game.name,
+          headerRight: () => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={isFavorite(game.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+              accessibilityState={{ selected: isFavorite(game.id) }}
+              hitSlop={12}
+              onPress={() => toggleFavorite(game.id)}
+            >
+              <Text style={[styles.star, isFavorite(game.id) && styles.starOn]}>{isFavorite(game.id) ? '★' : '☆'}</Text>
+            </Pressable>
+          ),
+        }}
+      />
       <View style={[common.card, styles.header]}>
         <Text style={styles.emoji}>{game.emoji}</Text>
         <Text style={common.title}>{game.name}</Text>
@@ -71,6 +88,8 @@ export default function GameScreen() {
 }
 
 const styles = StyleSheet.create({
+  star: { fontSize: 26, color: colors.muted },
+  starOn: { color: colors.star },
   header: { alignItems: 'center', gap: 4 },
   emoji: { fontSize: 48 },
   match: { gap: 6 },

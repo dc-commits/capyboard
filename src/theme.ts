@@ -10,6 +10,7 @@ export const colors = {
   primaryText: '#FFFFFF',
   success: '#2E7D4F',
   danger: '#B3261E',
+  star: '#E8A317',
 };
 
 export const common = StyleSheet.create({
