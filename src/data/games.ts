@@ -8,13 +8,28 @@ export type RuleSection = {
 /** Valeurs saisies pour un joueur sur une manche, par clé de champ */
 export type RoundDetail = Record<string, number>;
 
-export type ScoreField = {
+type ScoreFieldBase = {
   key: string;
   label: string;
   icon: string;
-  /** Accepte les valeurs négatives */
-  signed: boolean;
+  /** Clé d'une case à cocher qui, cochée, neutralise ce champ (valeur 0) */
+  disabledWhen?: string;
 };
+
+export type ScoreField =
+  | (ScoreFieldBase & {
+      kind: 'number';
+      /** Accepte les valeurs négatives */
+      signed: boolean;
+      /** Laissé vide, vaut 0 */
+      optional?: boolean;
+    })
+  | (ScoreFieldBase & {
+      /** Case à cocher, enregistrée comme 1 ou 0 */
+      kind: 'toggle';
+      /** Un seul joueur peut la cocher par manche */
+      exclusive?: boolean;
+    });
 
 export type TieBreaker = {
   label: string;
@@ -29,7 +44,11 @@ export type TieBreaker = {
 /** Saisie détaillée : le score de manche est calculé à partir de plusieurs champs */
 export type DetailedScoring = {
   fields: ScoreField[];
-  compute: (detail: RoundDetail) => number;
+  /**
+   * Score d'un joueur pour la manche. `round` contient la saisie de tous les joueurs
+   * (`null` si incomplète) ; renvoyer `null` si le score dépend d'une saisie manquante.
+   */
+  compute: (detail: RoundDetail, round: (RoundDetail | null)[]) => number | null;
   /** Critères de départage en cas d'égalité, appliqués dans l'ordre */
   tieBreakers: TieBreaker[];
 };
@@ -67,6 +86,20 @@ export const GAMES: Game[] = [
     duration: '30 min',
     winner: 'lowest',
     endCondition: { type: 'threshold', points: 100 },
+    scoring: {
+      fields: [
+        { kind: 'number', key: 'grid', label: 'Grille', icon: '🃏', signed: true },
+        { kind: 'toggle', key: 'finished', label: 'A fini la manche', icon: '🏁', exclusive: true },
+      ],
+      compute: ({ grid, finished }, round) => {
+        // Seul le joueur qui a fini peut être doublé, et seulement si son score est positif
+        if (!finished || grid <= 0) return grid;
+        if (round.some((detail) => detail === null)) return null;
+        const atOrBelow = round.filter((detail) => detail !== null && detail.grid <= grid).length;
+        return atOrBelow === 1 ? grid : grid * 2;
+      },
+      tieBreakers: [],
+    },
     rules: [
       {
         title: 'But du jeu',
@@ -123,9 +156,9 @@ export const GAMES: Game[] = [
     endCondition: { type: 'rounds', count: 2 },
     scoring: {
       fields: [
-        { key: 'sum', label: 'Somme', icon: '🧘', signed: true },
-        { key: 'watermelons', label: 'Pastèques', icon: '🍉', signed: false },
-        { key: 'fiesta', label: 'Fiesta', icon: '🎉', signed: false },
+        { kind: 'number', key: 'sum', label: 'Somme', icon: '🧘', signed: true },
+        { kind: 'number', key: 'watermelons', label: 'Pastèques', icon: '🍉', signed: false },
+        { kind: 'number', key: 'fiesta', label: 'Fiesta', icon: '🎉', signed: false },
       ],
       compute: ({ sum, watermelons, fiesta }) => watermelons + capybarakaFiestaPoints(fiesta) - Math.abs(sum),
       tieBreakers: [
@@ -221,6 +254,18 @@ export const GAMES: Game[] = [
     duration: '20 min',
     winner: 'highest',
     endCondition: { type: 'threshold', points: 200 },
+    scoring: {
+      fields: [
+        { kind: 'number', key: 'numbers', label: 'Numéros', icon: '🔢', signed: false, disabledWhen: 'bust' },
+        { kind: 'number', key: 'bonus', label: 'Bonus +', icon: '➕', signed: false, optional: true, disabledWhen: 'bust' },
+        { kind: 'toggle', key: 'double', label: 'Doublé', icon: '×2', disabledWhen: 'bust' },
+        { kind: 'toggle', key: 'flip7', label: 'Flip 7', icon: '7️⃣', disabledWhen: 'bust' },
+        { kind: 'toggle', key: 'bust', label: 'Sauté', icon: '💥' },
+      ],
+      // Numéros (doublés par le ×2), puis bonus, puis 15 points pour un Flip 7
+      compute: ({ numbers, bonus, double, flip7, bust }) => (bust ? 0 : numbers * (double ? 2 : 1) + bonus + (flip7 ? 15 : 0)),
+      tieBreakers: [],
+    },
     rules: [
       {
         title: 'But du jeu',

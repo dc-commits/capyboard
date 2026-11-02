@@ -2,7 +2,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button } from '@/components/Button';
-import { DetailedRoundEntry, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
+import { DetailedRoundEntry, formatDetail, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
 import { getGame } from '@/data/games';
 import { getEndReason, getProgress, getTieBreakerTotals, getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
@@ -29,13 +29,15 @@ export default function MatchScreen() {
   // Saisie détaillée : plusieurs champs par joueur, score calculé
   const details = scoring ? match.players.map((_, index) => parseDetail(scoring, detailDraft[index])) : [];
   const completeDetails = details.every((detail) => detail !== null) ? details.filter((detail) => detail !== null) : null;
+  const detailedScores = scoring && completeDetails ? completeDetails.map((detail) => scoring.compute(detail, completeDetails)) : null;
+  const computedScores = detailedScores?.every((score) => score !== null) ? detailedScores.filter((score) => score !== null) : null;
 
-  const canAdd = scoring ? completeDetails !== null : canAddSimple;
+  const canAdd = scoring ? computedScores !== null : canAddSimple;
 
   const submitRound = () => {
     if (scoring) {
-      if (!completeDetails) return;
-      addRound(match.id, { scores: completeDetails.map((detail) => scoring.compute(detail)), details: completeDetails }, game.endCondition);
+      if (!completeDetails || !computedScores) return;
+      addRound(match.id, { scores: computedScores, details: completeDetails }, game.endCondition);
       setDetailDraft([]);
     } else {
       addRound(match.id, { scores: parsed }, game.endCondition);
@@ -87,11 +89,7 @@ export default function MatchScreen() {
                 return (
                   <Text key={playerIndex} style={styles.cell} onLongPress={() => confirmRemoveRound(roundIndex)}>
                     {score}
-                    {scoring && detail && (
-                      <Text style={styles.detail}>
-                        {'\n' + scoring.fields.map((field) => `${field.icon}${detail[field.key]}`).join(' ')}
-                      </Text>
-                    )}
+                    {scoring && detail && <Text style={styles.detail}>{'\n' + formatDetail(scoring, detail)}</Text>}
                   </Text>
                 );
               })}
@@ -126,7 +124,7 @@ export default function MatchScreen() {
             ))}
           </View>
 
-          {scoring && match.details && match.details.length > 0 && (
+          {scoring && scoring.tieBreakers.length > 0 && match.details && match.details.length > 0 && (
             <View style={styles.row}>
               <Text style={[styles.cell, styles.roundCell]} />
               {match.players.map((_, playerIndex) => (

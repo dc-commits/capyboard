@@ -72,7 +72,8 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
           const next: Match = {
             ...match,
             rounds: [...match.rounds, scores],
-            ...(details && { details: [...(match.details ?? []), details] }),
+            // Les manches saisies avant la saisie détaillée gardent un détail vide
+            ...(details && { details: [...(match.details ?? match.rounds.map(() => [])), details] }),
           };
           return isGameOver(next, endCondition) ? { ...next, finishedAt: new Date().toISOString() } : next;
         }),
@@ -166,7 +167,8 @@ export function getWinners(match: Match, game: Game): Winners {
     getTotals(match),
     game.winner,
   );
-  const hasAllDetails = match.details?.length === match.rounds.length;
+  const hasAllDetails =
+    match.details?.length === match.rounds.length && match.details.every((round) => round.length === match.players.length);
   if (leaders.length < 2 || !game.scoring || !hasAllDetails) return { leaders };
 
   for (const tieBreaker of game.scoring.tieBreakers) {
