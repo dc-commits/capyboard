@@ -455,6 +455,151 @@ export const GAMES: Game[] = [
       },
     ],
   },
+  {
+    id: 'six-qui-prend',
+    name: '6 qui prend !',
+    emoji: '🐮',
+    players: '2 à 10 joueurs',
+    duration: '45 min',
+    winner: 'lowest',
+    // La partie s'arrête quand un joueur dépasse 66 têtes, donc à 67 ou plus
+    endCondition: { type: 'threshold', points: 67 },
+    scoring: {
+      fields: [{ kind: 'number', key: 'heads', label: 'Têtes de bœuf', icon: '🐮', signed: false }],
+      compute: ({ heads }) => heads,
+      tieBreakers: [],
+    },
+    rules: [
+      {
+        title: 'But du jeu',
+        body: 'Ramasser le moins de têtes de bœuf possible. On joue plusieurs manches jusqu’à ce qu’un joueur dépasse 66 têtes ; le plus petit total gagne.',
+      },
+      {
+        title: 'Matériel',
+        body: '104 cartes numérotées de 1 à 104. Chacune porte de 1 à 7 têtes de bœuf, qui sont des points de pénalité :',
+        items: [
+          'la plupart des cartes : 1 tête',
+          'finissant par 5 (5, 15, 25…) : 2 têtes',
+          'finissant par 0 (10, 20, 30…) : 3 têtes',
+          'doublets (11, 22, 33…) : 5 têtes',
+          '55 (doublet et finissant par 5) : 7 têtes',
+        ],
+      },
+      {
+        title: 'Mise en place',
+        items: [
+          'Distribuer 10 cartes à chaque joueur, qui les range par ordre croissant.',
+          'Poser 4 cartes face visible l’une sous l’autre : chacune commence une rangée. Le reste ne sert pas pour la manche.',
+        ],
+      },
+      {
+        title: 'Tour de jeu',
+        items: [
+          '1. Chacun choisit une carte et la pose face cachée.',
+          '2. On révèle tout en même temps.',
+          '3. Du plus petit numéro au plus grand, chacun place sa carte au bout d’une rangée.',
+        ],
+      },
+      {
+        title: 'Où placer sa carte',
+        items: [
+          'Valeurs croissantes : une carte va toujours après une carte plus petite.',
+          'Plus petite différence : parmi les rangées possibles, on doit choisir celle dont la dernière carte est la plus proche (en dessous).',
+          'Le choix n’est donc jamais libre : chaque carte n’a qu’une seule place.',
+        ],
+      },
+      {
+        title: 'Ramasser une rangée',
+        items: [
+          'Sixième carte : une rangée compte au plus 5 cartes. Celui qui doit poser la 6e ramasse les 5 cartes, et sa carte commence la nouvelle rangée.',
+          'Carte trop faible : si une carte est plus petite que la fin de toutes les rangées, son joueur ramasse la rangée de son choix (en général la moins chargée en têtes), et sa carte la remplace.',
+          'Les cartes ramassées forment une pile de pénalités devant soi, jamais dans la main.',
+        ],
+      },
+      {
+        title: 'Fin de manche et de partie',
+        body: 'Une manche s’arrête quand les 10 cartes sont jouées : chacun compte les têtes de sa pile. On enchaîne les manches jusqu’à ce qu’un joueur dépasse 66 têtes ; le plus petit total gagne. On peut aussi convenir d’un autre seuil ou d’un nombre de manches.',
+      },
+      {
+        title: 'Variantes pour tacticiens',
+        items: [
+          'Toutes les cartes connues : on ne garde que les cartes de 1 à (joueurs × 10 + 4), par exemple 1 à 44 à 4 joueurs.',
+          'Draft : les cartes sont étalées face visible et chacun choisit les siennes à tour de rôle jusqu’à en avoir 10.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'le-baron',
+    name: '6 qui prend ! Le Baron',
+    emoji: '🎩',
+    players: '2 à 10 joueurs',
+    duration: '30 min',
+    winner: 'lowest',
+    // Une seule partie par défaut ; « Reprendre la partie » permet d'en enchaîner d'autres
+    endCondition: { type: 'rounds', count: 1 },
+    scoring: {
+      fields: [{ kind: 'number', key: 'heads', label: 'Têtes de bœuf', icon: '🐮', signed: false }],
+      compute: ({ heads }) => heads,
+      tieBreakers: [],
+    },
+    rules: [
+      {
+        title: 'But du jeu',
+        body: 'La version « couleurs » de 6 qui prend : on place ses cartes selon la couleur des têtes de bœuf, pas selon leur numéro. Le moins de points négatifs à la fin gagne.',
+      },
+      {
+        title: 'Matériel',
+        body: '110 cartes numérotées de 1 à 110, avec des têtes de bœuf de 6 couleurs : bleu, jaune, vert, rouge, noir et blanc. Le nombre en rouge sur chaque carte indique ses points négatifs.',
+      },
+      {
+        title: 'Mise en place',
+        items: [
+          'Distribuer face cachée, selon le nombre de joueurs : 24 cartes à 2, 20 à 3, 16 de 4 à 6, 12 à 7 ou 8, 8 à 9 ou 10.',
+          'Sans les regarder, chacun en fait sa pioche personnelle et en tire 4 : c’est sa main.',
+          'Retourner 5 cartes en colonne au centre : chacune commence une rangée. Le reste retourne dans la boîte.',
+        ],
+      },
+      {
+        title: 'Tour de jeu',
+        items: [
+          '1. Chacun choisit une carte de sa main et la pose face cachée.',
+          '2. On révèle tout en même temps.',
+          '3. Du plus petit numéro au plus grand, chacun ajoute sa carte au bout d’une rangée.',
+          'On ne repioche 4 cartes que lorsque ses 4 cartes en main ont toutes été jouées.',
+        ],
+      },
+      {
+        title: 'Où placer sa carte',
+        items: [
+          'Couleur avec couleur : la dernière carte de la rangée doit montrer au moins une tête de la même couleur qu’une tête de sa carte.',
+          'S’il y a plusieurs rangées possibles, on choisit librement (ou celle qui embête le plus les autres).',
+          'Les numéros ne servent qu’à fixer l’ordre de jeu, pas les rangées.',
+          'Le Baron (cartes 52 et 104) a les 6 couleurs : il va dans n’importe quelle rangée.',
+        ],
+      },
+      {
+        title: 'Ramasser une rangée',
+        items: [
+          'Sixième carte : celui qui pose la 6e carte d’une rangée ramasse les 5 premières ; sa carte commence la rangée.',
+          'Six têtes d’une couleur : si la rangée compte alors 6 têtes ou plus d’une même couleur, on ramasse toutes les cartes à gauche de la sienne ; sa carte devient la première.',
+          'Aucune couleur commune : on ramasse la rangée de son choix et sa carte la remplace.',
+          'Les cartes ramassées forment une pile de points négatifs devant soi, jamais dans la main ni la pioche.',
+        ],
+      },
+      {
+        title: 'Fin de partie',
+        body: 'Quand toutes les cartes ont été jouées, chacun compte ses points négatifs (6 pour un Baron). Le plus petit total gagne ; en cas d’égalité, on partage la victoire. On peut aussi convenir à l’avance de plusieurs parties et additionner les scores.',
+      },
+      {
+        title: 'Variantes',
+        items: [
+          'La couleur prime : on supprime la règle de la sixième carte ; on ne ramasse qu’avec six têtes d’une couleur ou sans couleur commune.',
+          'Points positifs : les têtes ramassées rapportent des points. Une carte qu’on ne peut poser nulle part repart sous sa pioche ; la partie s’arrête à la fin du tour où quelqu’un a posé sa dernière carte, et les têtes restées en main ou en pioche comptent en négatif.',
+        ],
+      },
+    ],
+  },
 ];
 
 export function getGame(id: string): Game | undefined {

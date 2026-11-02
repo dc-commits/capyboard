@@ -47,7 +47,7 @@ export default function GameScreen() {
         <Text style={common.subtitle}>
           Fin :{' '}
           {game.endCondition.type === 'rounds'
-            ? `après ${game.endCondition.count} manches`
+            ? `après ${game.endCondition.count} manche${game.endCondition.count > 1 ? 's' : ''}`
             : `dès qu’un joueur atteint ${game.endCondition.points} points`}
         </Text>
       </View>
