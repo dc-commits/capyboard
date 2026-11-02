@@ -2,6 +2,7 @@ import { Stack, router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button } from '@/components/Button';
+import { CatalogRow } from '@/components/CatalogRow';
 import { Chip } from '@/components/Chip';
 import { OngoingMatches } from '@/components/OngoingMatches';
 import { UpdateBanner } from '@/components/UpdateBanner';
@@ -16,7 +17,7 @@ import { DURATION_FILTERS, PLAYER_FILTERS, SORT_LABELS, filterAndSortGames, matc
 export default function GamesScreen() {
   const contentStyle = useContentStyle();
   const { matches } = useMatches();
-  const { library } = useGames();
+  const { games: allGames, library, isInLibrary } = useGames();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -29,6 +30,15 @@ export default function GamesScreen() {
 
   const activeFilters = Number(players !== null) + Number(maxDuration !== null);
   const games = filterAndSortGames(library, matches, isFavorite, { query, sort, players, maxDuration });
+  // Pendant une recherche, on propose aussi les jeux du catalogue qui ne sont pas (encore) dans la bibliothèque
+  const catalogResults = query.trim()
+    ? filterAndSortGames(
+        allGames.filter((game) => !isInLibrary(game.id)),
+        matches,
+        isFavorite,
+        { query, sort: 'alpha', players, maxDuration },
+      )
+    : [];
 
   const resetFilters = () => {
     setQuery('');
@@ -133,7 +143,9 @@ export default function GamesScreen() {
           </View>
         }
         ListEmptyComponent={
-          library.length === 0 ? (
+          catalogResults.length > 0 ? (
+            <Text style={common.subtitle}>Aucun jeu de ta bibliothèque ne correspond.</Text>
+          ) : library.length === 0 ? (
             <Text style={common.subtitle}>Ta bibliothèque est vide : ajoute des jeux depuis le catalogue ou crée les tiens.</Text>
           ) : (
             <View style={styles.empty}>
@@ -144,6 +156,14 @@ export default function GamesScreen() {
         }
         ListFooterComponent={
           <View style={styles.footer}>
+            {catalogResults.length > 0 && (
+              <View style={styles.catalog}>
+                <Text style={common.sectionTitle}>Dans le catalogue</Text>
+                {catalogResults.map((game) => (
+                  <CatalogRow key={game.id} game={game} />
+                ))}
+              </View>
+            )}
             <Button label="➕  Ajouter des jeux" variant="secondary" onPress={() => router.push('/library')} />
             <Pressable accessibilityRole="link" onPress={() => router.push('/about')} style={styles.about} hitSlop={8}>
               <Text style={styles.footerText}>À propos · Mises à jour</Text>
@@ -217,6 +237,7 @@ const styles = StyleSheet.create({
   emoji: { fontSize: 34 },
   info: { flex: 1, gap: 2 },
   footer: { gap: 12, paddingTop: 4 },
+  catalog: { gap: 12, marginTop: 8 },
   about: { alignSelf: 'center' },
   footerText: { fontSize: 14, fontWeight: '600', color: colors.muted },
   star: { fontSize: 26, color: colors.muted },
