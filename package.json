@@ -31,7 +31,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "update:preview": "eas update --channel preview --environment preview"
+    "update:preview": "npx --yes eas-cli@latest update --channel preview --environment preview"
   },
   "private": true
 }
