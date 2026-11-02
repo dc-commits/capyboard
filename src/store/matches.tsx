@@ -17,18 +17,24 @@ export type Match = {
   rounds: number[][];
   /** Saisie détaillée (jeux avec `scoring`) : même forme que `rounds`, les valeurs saisies au lieu du score */
   details?: RoundDetail[][];
+  /** Extensions du jeu utilisées pour cette partie */
+  expansionIds?: string[];
+  /** Jeux sans score : joueurs désignés gagnants en fin de partie */
+  winnerIndexes?: number[];
 };
 
 type MatchesContextValue = {
   matches: Match[];
   loaded: boolean;
   /** Sans profil (parties d'avant les profils), `id` est absent */
-  createMatch: (gameId: string, players: (Pick<Player, 'name'> & Partial<Pick<Player, 'id'>>)[]) => Match;
+  createMatch: (gameId: string, players: (Pick<Player, 'name'> & Partial<Pick<Player, 'id'>>)[], expansionIds?: string[]) => Match;
   /** Ajoute une manche et termine la partie si la condition de fin est atteinte */
   addRound: (matchId: string, round: { scores: number[]; details?: RoundDetail[] }, endCondition: EndCondition) => void;
   /** Supprime une manche ; la partie redevient en cours */
   removeRound: (matchId: string, roundIndex: number) => void;
   finishMatch: (matchId: string) => void;
+  /** Jeux sans score : désigne le ou les gagnants et termine la partie */
+  setWinners: (matchId: string, winnerIndexes: number[]) => void;
   resumeMatch: (matchId: string) => void;
   deleteMatch: (matchId: string) => void;
   /** Répercute le nouveau nom d'un profil dans ses parties */
@@ -63,7 +69,7 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
     () => ({
       matches,
       loaded,
-      createMatch: (gameId, players) => {
+      createMatch: (gameId, players, expansionIds) => {
         const match: Match = {
           id: createId(),
           gameId,
@@ -72,6 +78,7 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
           players: players.map((player) => player.name),
           ...(players.every((player) => player.id) && { playerIds: players.flatMap((player) => player.id ?? []) }),
           rounds: [],
+          ...(expansionIds && expansionIds.length > 0 && { expansionIds }),
         };
         setMatches((current) => [match, ...current]);
         return match;
@@ -94,6 +101,8 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
           ...(match.details && { details: match.details.filter((_, index) => index !== roundIndex) }),
         })),
       finishMatch: (matchId) => updateMatch(matchId, (match) => ({ ...match, finishedAt: new Date().toISOString() })),
+      setWinners: (matchId, winnerIndexes) =>
+        updateMatch(matchId, (match) => ({ ...match, winnerIndexes, finishedAt: new Date().toISOString() })),
       resumeMatch: (matchId) => updateMatch(matchId, (match) => ({ ...match, finishedAt: null })),
       deleteMatch: (matchId) => setMatches((current) => current.filter((match) => match.id !== matchId)),
       renamePlayer: (playerId, name) =>
@@ -133,6 +142,7 @@ function joinNames(names: string[]): string {
 
 /** Où en est une partie en cours par rapport à sa condition de fin */
 export function getProgress(match: Match, game: Game): string {
+  if (game.scoreless) return 'Désignez le gagnant à la fin de la partie';
   const { endCondition } = game;
   if (endCondition.type === 'rounds') {
     const next = match.rounds.length + 1;
@@ -150,6 +160,7 @@ export function getProgress(match: Match, game: Game): string {
 
 /** Pourquoi une partie terminée s'est arrêtée */
 export function getEndReason(match: Match, game: Game): string {
+  if (game.scoreless) return 'Partie terminée';
   const { endCondition } = game;
   const played = `${match.rounds.length} manche${match.rounds.length > 1 ? 's' : ''}`;
   if (endCondition.type === 'rounds') {
@@ -181,6 +192,7 @@ export type Winners = {
 };
 
 export function getWinners(match: Match, game: Game): Winners {
+  if (game.scoreless) return { leaders: match.winnerIndexes ?? [] };
   if (match.rounds.length === 0) return { leaders: [] };
   let leaders = keepBest(
     match.players.map((_, index) => index),

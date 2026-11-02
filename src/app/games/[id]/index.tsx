@@ -66,8 +66,16 @@ export default function GameScreen() {
         <Text style={common.subtitle}>
           {formatPlayers(game)} · {formatDuration(game)}
         </Text>
-        <Text style={common.subtitle}>Gagnant : {game.winner === 'highest' ? 'le plus haut score' : 'le plus petit score'}</Text>
-        <Text style={common.subtitle}>Fin : {describeEnd(game.endCondition)}</Text>
+        {!game.scoreless && (
+          <Text style={common.subtitle}>Gagnant : {game.winner === 'highest' ? 'le plus haut score' : 'le plus petit score'}</Text>
+        )}
+        <Text style={common.subtitle}>Fin : {game.endDescription ?? describeEnd(game.endCondition)}</Text>
+        {game.expansions && game.expansions.length > 0 && (
+          <Text style={common.subtitle}>
+            Extension{game.expansions.length > 1 ? 's' : ''} :{' '}
+            {game.expansions.map((expansion) => `${expansion.emoji} ${expansion.name}`).join(', ')}
+          </Text>
+        )}
         {game.custom && <Text style={styles.customTag}>✏️ Jeu créé par toi</Text>}
       </View>
 
@@ -100,8 +108,18 @@ export default function GameScreen() {
               </Text>
             </View>
             <Text style={common.subtitle}>
-              {match.players.map((player, index) => `${leaders.includes(index) ? '🏆 ' : ''}${player} ${totals[index]}`).join(' · ')}
+              {match.players
+                .map((player, index) => `${leaders.includes(index) ? '🏆 ' : ''}${player}${game.scoreless ? '' : ` ${totals[index]}`}`)
+                .join(' · ')}
             </Text>
+            {match.expansionIds && match.expansionIds.length > 0 && (
+              <Text style={common.subtitle}>
+                {game.expansions
+                  ?.filter((expansion) => match.expansionIds?.includes(expansion.id))
+                  .map((expansion) => `${expansion.emoji} ${expansion.name}`)
+                  .join(', ')}
+              </Text>
+            )}
           </Pressable>
         );
       })}

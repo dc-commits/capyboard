@@ -6,9 +6,9 @@ export type GameStats = {
   game: Game;
   played: number;
   wins: number;
-  /** Meilleur total sur une partie (le plus haut ou le plus bas selon le jeu) */
-  best: number;
-  average: number;
+  /** Meilleur total sur une partie (le plus haut ou le plus bas selon le jeu) ; `null` pour un jeu sans score */
+  best: number | null;
+  average: number | null;
 };
 
 export type PlayerStats = {
@@ -27,10 +27,13 @@ function getGameStats(playerId: string, game: Game, matches: Match[]): GameStats
   });
   if (results.length === 0) return null;
   const totals = results.map((result) => result.total);
+  const played = results.length;
+  const wins = results.filter((result) => result.won).length;
+  if (game.scoreless) return { game, played, wins, best: null, average: null };
   return {
     game,
-    played: results.length,
-    wins: results.filter((result) => result.won).length,
+    played,
+    wins,
     best: game.winner === 'highest' ? Math.max(...totals) : Math.min(...totals),
     average: Math.round((totals.reduce((sum, total) => sum + total, 0) / totals.length) * 10) / 10,
   };
@@ -64,6 +67,6 @@ export function getGameLeaderboard(game: Game, players: Player[], matches: Match
       (a, b) =>
         b.stats.wins - a.stats.wins ||
         b.stats.wins / b.stats.played - a.stats.wins / a.stats.played ||
-        bestFirst * (a.stats.best - b.stats.best),
+        bestFirst * ((a.stats.best ?? 0) - (b.stats.best ?? 0)),
     );
 }

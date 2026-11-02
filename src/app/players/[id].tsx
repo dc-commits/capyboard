@@ -85,8 +85,8 @@ export default function PlayerScreen() {
                 </Text>
                 <View style={styles.stats}>
                   <Stat value={`${wins}/${played}`} label="victoires" />
-                  <Stat value={String(best)} label="meilleur score" />
-                  <Stat value={String(average).replace('.', ',')} label="moyenne" />
+                  {best !== null && <Stat value={String(best)} label="meilleur score" />}
+                  {average !== null && <Stat value={String(average).replace('.', ',')} label="moyenne" />}
                 </View>
               </View>
             ))}

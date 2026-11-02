@@ -48,10 +48,12 @@ export function GameLeaderboard({ game }: { game: Game }) {
                   {stats.wins}/{plural(stats.played, 'partie')} gagnée{stats.wins > 1 ? 's' : ''} · {winRate(stats.wins, stats.played)}
                 </Text>
               </View>
-              <View style={styles.best}>
-                <Text style={styles.bestValue}>{stats.best}</Text>
-                <Text style={styles.bestLabel}>record</Text>
-              </View>
+              {stats.best !== null && (
+                <View style={styles.best}>
+                  <Text style={styles.bestValue}>{stats.best}</Text>
+                  <Text style={styles.bestLabel}>record</Text>
+                </View>
+              )}
             </Pressable>
           ))}
         </View>

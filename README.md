@@ -10,7 +10,7 @@ Application mobile (Android, iOS) pour lire les règles de ses jeux de société
 
 ## Fonctionnalités
 
-- **Bibliothèque de jeux** : on choisit ses jeux dans le catalogue (Skyjo, Capybaraka, Flip 7, Odin, 6 qui prend !, Le Baron) et on peut **créer les siens** depuis l'app (fiche, fin de partie, règles).
+- **Bibliothèque de jeux** : on choisit ses jeux dans le catalogue (Skyjo, Capybaraka, Flip 7, Odin, 6 qui prend !, Le Baron, Mycelia) et on peut **créer les siens** depuis l'app (fiche, fin de partie, règles).
 - **Recherche, tri et filtres** : favoris en tête, tri A → Z, plus joués ou récents, filtres par nombre de joueurs et durée.
 - **Règles** détaillées par sections, résumées d'après les livrets officiels.
 - **Feuille de score** par manche, avec une aide au calcul propre à chaque jeu :
@@ -18,7 +18,9 @@ Application mobile (Android, iOS) pour lire les règles de ses jeux de société
   - Capybaraka : somme des cartes, pastèques et Fiesta, départage officiel des égalités ;
   - Flip 7 : sélection des cartes dans une fenêtre (numéros, bonus, ×2, Sauté), Flip 7 détecté seul ;
   - Odin : cartes restées en main ;
-  - 6 qui prend ! et Le Baron : têtes de bœuf.
+  - 6 qui prend ! et Le Baron : têtes de bœuf ;
+  - Mycelia : jeu de course sans score, on désigne simplement le ou les gagnants.
+- **Extensions** : choisies au lancement de la partie (Mycelia – Prisma), avec leurs règles dans un onglet à part.
 - **Fin de partie automatique** (seuil de points ou nombre de manches), reprise et revanche.
 - **Parties en cours** sur l'accueil, pour reprendre en un toucher.
 - **Profils de joueurs** (avatar, couleur) et **statistiques** : victoires, meilleur score, moyenne par jeu.
@@ -95,6 +97,11 @@ Sans `scoring`, on saisit directement un score par joueur et par manche. Avec `s
 - `compute(detail, round)` : le score d'un joueur, à partir de sa saisie et de celle de toute la manche.
 - `tieBreakers` : critères de départage en cas d'égalité.
 - `entry: 'modal'` : une ligne par joueur, la saisie s'ouvre dans une fenêtre.
+
+Autres options d'un jeu :
+
+- `scoreless: true` : pas de score, la partie se termine en désignant le ou les gagnants (avec `endDescription` pour décrire la fin).
+- `expansions` : extensions choisies au lancement de la partie, chacune avec ses règles en plus.
 
 Les règles sont des résumés rédigés, pas des copies des livrets.
 

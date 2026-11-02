@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
 import { useContentStyle } from '@/hooks/useContentStyle';
 import { useGames } from '@/store/games';
 import { useMatches } from '@/store/matches';
@@ -21,6 +22,8 @@ export default function NewMatchScreen() {
   const lastPlayerIds = matches.find((match) => match.gameId === id && match.playerIds)?.playerIds ?? [];
   const [selectedIds, setSelectedIds] = useState<string[]>(() => lastPlayerIds.filter((playerId) => getPlayer(playerId)));
   const [newName, setNewName] = useState('');
+  // Pré-sélectionne aussi les extensions de la dernière partie de ce jeu
+  const [expansionIds, setExpansionIds] = useState<string[]>(() => matches.find((match) => match.gameId === id)?.expansionIds ?? []);
 
   if (!game) return <Text style={common.content}>Jeu introuvable</Text>;
 
@@ -40,7 +43,11 @@ export default function NewMatchScreen() {
   };
 
   const start = () => {
-    const match = createMatch(game.id, selected);
+    const match = createMatch(
+      game.id,
+      selected,
+      expansionIds.filter((expansionId) => game.expansions?.some((expansion) => expansion.id === expansionId)),
+    );
     router.replace({ pathname: '/matches/[matchId]', params: { matchId: match.id } });
   };
 
@@ -50,6 +57,26 @@ export default function NewMatchScreen() {
         <Text style={common.title}>
           {game.emoji} {game.name}
         </Text>
+
+        {game.expansions && game.expansions.length > 0 && (
+          <>
+            <Text style={common.sectionTitle}>Extensions</Text>
+            <View style={styles.chips}>
+              {game.expansions.map((expansion) => (
+                <Chip
+                  key={expansion.id}
+                  label={`${expansion.emoji} ${expansion.name}`}
+                  selected={expansionIds.includes(expansion.id)}
+                  onPress={() =>
+                    setExpansionIds((current) =>
+                      current.includes(expansion.id) ? current.filter((value) => value !== expansion.id) : [...current, expansion.id],
+                    )
+                  }
+                />
+              ))}
+            </View>
+          </>
+        )}
 
         <Text style={common.sectionTitle}>Joueurs de la partie ({selected.length})</Text>
         {selected.length === 0 ? (

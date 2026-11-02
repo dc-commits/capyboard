@@ -61,6 +61,15 @@ export type DetailedScoring = {
   hint?: (detail: RoundDetail) => string | null;
 };
 
+/** Extension d'un jeu, choisie au lancement de chaque partie */
+export type Expansion = {
+  id: string;
+  name: string;
+  emoji: string;
+  /** Règles ajoutées ou modifiées par l'extension, affichées après celles du jeu de base */
+  rules: RuleSection[];
+};
+
 /** Quand la partie s'arrête : un joueur atteint un seuil, un nombre fixe de manches, ou quand on le décide */
 export type EndCondition = { type: 'threshold'; points: number } | { type: 'rounds'; count: number } | { type: 'manual' };
 
@@ -77,8 +86,13 @@ export type Game = {
   /** Qui gagne : le plus haut total ou le plus bas */
   winner: 'highest' | 'lowest';
   endCondition: EndCondition;
+  /** Remplace la description générée de la fin de partie (jeux sans score, par exemple) */
+  endDescription?: string;
+  /** Pas de score : en fin de partie, on désigne seulement le ou les gagnants */
+  scoreless?: boolean;
   /** Sans ce champ, on saisit directement un score par joueur et par manche */
   scoring?: DetailedScoring;
+  expansions?: Expansion[];
   rules: RuleSection[];
 };
 
@@ -605,6 +619,97 @@ export const BUILT_IN_GAMES: Game[] = [
         items: [
           'La couleur prime : on supprime la règle de la sixième carte ; on ne ramasse qu’avec six têtes d’une couleur ou sans couleur commune.',
           'Points positifs : les têtes ramassées rapportent des points. Une carte qu’on ne peut poser nulle part repart sous sa pioche ; la partie s’arrête à la fin du tour où quelqu’un a posé sa dernière carte, et les têtes restées en main ou en pioche comptent en négatif.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'mycelia',
+    name: 'Mycelia',
+    emoji: '🍄',
+    minPlayers: 1,
+    maxPlayers: 4,
+    durationMinutes: 45,
+    // Course : le premier à vider son plateau gagne, il n'y a pas de score à noter
+    winner: 'highest',
+    scoreless: true,
+    endCondition: { type: 'manual' },
+    endDescription: 'quand un joueur a retiré toutes ses gouttes (on finit le tour)',
+    rules: [
+      {
+        title: 'But du jeu',
+        body: 'Un jeu de deck-building dans une forêt de champignons : chacun améliore son paquet de cartes pour retirer le plus vite possible les gouttes de rosée de son plateau. Le premier à vider son plateau gagne.',
+      },
+      {
+        title: 'Mise en place',
+        items: [
+          'Chaque joueur prend un plateau, ses cartes action a et b, et place 20 gouttes de rosée selon la carte de mise en place.',
+          'Il mélange ses 6 cartes de départ et en pioche 3 : c’est sa main.',
+          'Le sanctuaire va au centre, avec le dé de réserve sur l’emplacement correspondant au nombre de joueurs. On tire une carte de réserve au hasard.',
+          'On mélange les 40 cartes et on en révèle 5 : c’est la vitrine. Les feuilles (la monnaie) forment une réserve commune.',
+        ],
+      },
+      {
+        title: 'Tour de jeu',
+        items: [
+          '1. Jouer ses 3 cartes une par une, en appliquant chaque effet avant la suivante : déplacer, retirer des gouttes, gagner des feuilles…',
+          '2. À tout moment, acheter des cartes de la vitrine avec ses feuilles (de 2 à 8).',
+          '3. Utiliser au plus une fois chacune les actions de base : a (1 feuille) renouvelle la vitrine, b (3 feuilles) déplace une goutte d’une case.',
+          '4. Défausser les cartes jouées, compléter la vitrine à 5 cartes et repiocher 3 cartes.',
+        ],
+      },
+      {
+        title: 'Gouttes et sanctuaire',
+        items: [
+          'Une goutte qui atteint la case sanctuaire de son plateau, ou qu’un effet retire, est déposée dans le sanctuaire à la fin du tour.',
+          'Quand le sanctuaire est plein (20 gouttes à 4 joueurs, 15 à 3, 10 à 2), on le fait tourner : la carte de réserve indique combien de gouttes (1 ou 2) chacun remet sur son plateau. Le reste quitte la partie et la carte de réserve est retournée.',
+        ],
+      },
+      {
+        title: 'Fin de partie',
+        items: [
+          'Quand un joueur retire sa dernière goutte, on termine le tour pour que tout le monde ait joué autant de fois. Si cette dernière goutte remplit le sanctuaire, on ne le fait pas tourner.',
+          'Gagne celui qui n’a plus de gouttes sur son plateau.',
+          'Si plusieurs joueurs ont vidé leur plateau, celui qui a le plus de feuilles l’emporte ; en cas d’égalité, ils partagent la victoire.',
+        ],
+      },
+      {
+        title: 'Mode solo',
+        body: 'On affronte Gwidyon, un adversaire virtuel avec ses propres cartes et 20 gouttes. Le sanctuaire tourne dès 10 gouttes, mais Gwidyon ne reçoit jamais de nouvelles gouttes. Le premier à vider son plateau gagne. Pour corser la partie, donner 21 à 25 gouttes à Gwidyon.',
+      },
+    ],
+    expansions: [
+      {
+        id: 'prisma',
+        name: 'Prisma',
+        emoji: '🌈',
+        rules: [
+          {
+            title: 'Ce qui change',
+            body: 'Toutes les règles du jeu de base s’appliquent. Prisma ajoute des gouttes prismatiques, des faveurs et des cartes cadeaux de la déesse de la forêt.',
+          },
+          {
+            title: 'Mise en place',
+            items: [
+              'Mélanger les 40 cartes de base, les 30 cartes d’extension de la boîte de base et les 20 cartes Prisma en une seule pioche.',
+              'Placer la barre des faveurs sur le sanctuaire, et sur chaque plateau 12 gouttes de rosée et 10 gouttes prismatiques selon la nouvelle carte de mise en place.',
+              'Chacun reçoit une zone cadeaux, un champignon (posé sur la case 0 de la barre) et une septième carte de départ à sa rune. À 3 joueurs, un champignon inutilisé bloque la case I ; à 2, deux bloquent les cases I et II.',
+              'Former trois piles de cartes cadeaux face visible : verte, ambre et violette.',
+            ],
+          },
+          {
+            title: 'Faveurs et cadeaux',
+            items: [
+              'Une goutte prismatique se déplace et se retire comme une goutte de rosée. Chaque goutte prismatique retirée rapporte une faveur : on avance son champignon d’une case libre sur la barre.',
+              'On dépense ses faveurs pour acheter une carte cadeau de la couleur atteinte (ou moins chère) : le champignon revient à 0, sans rendu de monnaie. La carte va sur sa pioche.',
+              'Une carte cadeau piochée se pose aussitôt dans sa zone cadeaux et fait piocher autant de cartes que son chiffre (0 à 3). Son effet dure tout le tour, puis elle est défaussée.',
+              'Quand le sanctuaire déborde, seules des gouttes de rosée reviennent, jamais de gouttes prismatiques.',
+            ],
+          },
+          {
+            title: 'Fin de partie',
+            body: 'Comme dans le jeu de base, avec un départage de plus : si plusieurs joueurs ont vidé leur plateau, celui qui a le plus de feuilles gagne, puis, en cas d’égalité, celui qui a le plus de faveurs restantes.',
+          },
         ],
       },
     ],

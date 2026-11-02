@@ -31,6 +31,10 @@ type GamesContextValue = {
 
 const CUSTOM_GAMES_KEY = 'capyboard/custom-games/v1';
 const LIBRARY_KEY = 'capyboard/library/v1';
+/** Jeux du catalogue intégré déjà proposés : un jeu ajouté au catalogue arrive une fois dans la bibliothèque */
+const KNOWN_BUILT_IN_KEY = 'capyboard/library/known-built-in/v1';
+/** Catalogue d'avant le suivi des nouveautés, pour les bibliothèques déjà enregistrées */
+const INITIAL_BUILT_IN_IDS = ['skyjo', 'capybaraka', 'flip7', 'odin', 'six-qui-prend', 'le-baron'];
 
 function toGame(stored: StoredCustomGame): Game {
   const { rulesText, createdAt: _createdAt, ...fields } = stored;
@@ -46,10 +50,15 @@ export function GamesProvider({ children }: { children: ReactNode }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.multiGet([CUSTOM_GAMES_KEY, LIBRARY_KEY])
-      .then(([[, custom], [, library]]) => {
+    AsyncStorage.multiGet([CUSTOM_GAMES_KEY, LIBRARY_KEY, KNOWN_BUILT_IN_KEY])
+      .then(([[, custom], [, library], [, known]]) => {
         if (custom) setCustomGames(JSON.parse(custom) as StoredCustomGame[]);
-        if (library) setLibraryIds(JSON.parse(library) as string[]);
+        if (library) {
+          const knownIds = known ? (JSON.parse(known) as string[]) : INITIAL_BUILT_IN_IDS;
+          const newIds = BUILT_IN_GAMES.map((game) => game.id).filter((id) => !knownIds.includes(id));
+          setLibraryIds([...(JSON.parse(library) as string[]), ...newIds]);
+        }
+        void AsyncStorage.setItem(KNOWN_BUILT_IN_KEY, JSON.stringify(BUILT_IN_GAMES.map((game) => game.id)));
       })
       .finally(() => setLoaded(true));
   }, []);
