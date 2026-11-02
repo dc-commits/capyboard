@@ -1,0 +1,145 @@
+import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button } from '@/components/Button';
+import { getGame } from '@/data/games';
+import { getLeaders, getTotals, useMatches } from '@/store/matches';
+import { colors, common } from '@/theme';
+
+export default function MatchScreen() {
+  const { matchId } = useLocalSearchParams<{ matchId: string }>();
+  const { matches, addRound, removeRound, finishMatch, deleteMatch } = useMatches();
+  const match = matches.find((candidate) => candidate.id === matchId);
+  const game = match ? getGame(match.gameId) : undefined;
+  const [draft, setDraft] = useState<string[]>([]);
+
+  if (!match || !game) return <Text style={common.content}>Partie introuvable</Text>;
+
+  const totals = getTotals(match);
+  const leaders = getLeaders(match, game.winner);
+  const values = match.players.map((_, index) => draft[index] ?? '');
+  const parsed = values.map((value) => Number(value.replace(',', '.')));
+  const canAdd = values.every((value) => value.trim() !== '') && parsed.every((value) => Number.isFinite(value));
+
+  const submitRound = () => {
+    addRound(match.id, parsed);
+    setDraft([]);
+  };
+
+  const confirmRemoveRound = (roundIndex: number) =>
+    Alert.alert(`Supprimer la manche ${roundIndex + 1} ?`, undefined, [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Supprimer', style: 'destructive', onPress: () => removeRound(match.id, roundIndex) },
+    ]);
+
+  const confirmDelete = () =>
+    Alert.alert('Supprimer la partie ?', 'Les scores seront perdus.', [
+      { text: 'Annuler', style: 'cancel' },
+      {
+        text: 'Supprimer',
+        style: 'destructive',
+        onPress: () => {
+          router.back();
+          deleteMatch(match.id);
+        },
+      },
+    ]);
+
+  return (
+    <KeyboardAvoidingView style={common.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <Stack.Screen options={{ title: `${game.emoji} ${game.name}` }} />
+      <ScrollView contentContainerStyle={common.content} keyboardShouldPersistTaps="handled">
+        <View style={common.card}>
+          <View style={styles.row}>
+            <Text style={[styles.cell, styles.roundCell, styles.head]}>#</Text>
+            {match.players.map((player, index) => (
+              <Text key={index} style={[styles.cell, styles.head]} numberOfLines={1}>
+                {player}
+              </Text>
+            ))}
+          </View>
+
+          {match.rounds.map((round, roundIndex) => (
+            <View key={roundIndex} style={[styles.row, styles.roundRow]}>
+              <Text style={[styles.cell, styles.roundCell, styles.muted]} onLongPress={() => confirmRemoveRound(roundIndex)}>
+                {roundIndex + 1}
+              </Text>
+              {round.map((score, playerIndex) => (
+                <Text key={playerIndex} style={styles.cell} onLongPress={() => confirmRemoveRound(roundIndex)}>
+                  {score}
+                </Text>
+              ))}
+            </View>
+          ))}
+
+          {!match.finishedAt && (
+            <View style={[styles.row, styles.roundRow]}>
+              <Text style={[styles.cell, styles.roundCell, styles.muted]}>{match.rounds.length + 1}</Text>
+              {values.map((value, index) => (
+                <TextInput
+                  key={index}
+                  style={[common.input, styles.cell, styles.scoreInput]}
+                  value={value}
+                  keyboardType="numbers-and-punctuation"
+                  placeholder="0"
+                  placeholderTextColor={colors.muted}
+                  onChangeText={(text) => setDraft(() => values.map((current, i) => (i === index ? text : current)))}
+                  onSubmitEditing={() => canAdd && submitRound()}
+                />
+              ))}
+            </View>
+          )}
+
+          <View style={[styles.row, styles.totalRow]}>
+            <Text style={[styles.cell, styles.roundCell, styles.head]}>Σ</Text>
+            {totals.map((total, index) => (
+              <Text key={index} style={[styles.cell, styles.total, leaders.includes(index) && styles.leader]}>
+                {leaders.includes(index) ? '🏆 ' : ''}
+                {total}
+              </Text>
+            ))}
+          </View>
+        </View>
+
+        {match.rounds.length > 0 && <Text style={styles.hint}>Appui long sur une manche pour la supprimer.</Text>}
+
+        {!match.finishedAt ? (
+          <>
+            <Button label="Valider la manche" disabled={!canAdd} onPress={submitRound} />
+            <Button
+              label="Terminer la partie"
+              variant="secondary"
+              disabled={match.rounds.length === 0}
+              onPress={() => finishMatch(match.id)}
+            />
+          </>
+        ) : (
+          <View style={[common.card, styles.result]}>
+            <Text style={common.title}>
+              🏆 {leaders.map((index) => match.players[index]).join(' & ')} {leaders.length > 1 ? 'gagnent' : 'gagne'} !
+            </Text>
+            <Text style={common.subtitle}>
+              Partie terminée en {match.rounds.length} manche{match.rounds.length > 1 ? 's' : ''}
+            </Text>
+          </View>
+        )}
+        <Button label="Supprimer la partie" variant="danger" onPress={confirmDelete} />
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  roundRow: { paddingVertical: 6, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
+  totalRow: { paddingTop: 10, marginTop: 4, borderTopWidth: 2, borderTopColor: colors.text },
+  cell: { flex: 1, textAlign: 'center', fontSize: 16, color: colors.text },
+  roundCell: { flex: 0, width: 28 },
+  head: { fontWeight: '700', paddingBottom: 6 },
+  muted: { color: colors.muted },
+  scoreInput: { minWidth: 0, paddingHorizontal: 4, paddingVertical: 8 },
+  total: { fontWeight: '700', fontSize: 18 },
+  leader: { color: colors.success },
+  hint: { fontSize: 13, color: colors.muted, textAlign: 'center' },
+  result: { alignItems: 'center', gap: 4 },
+});
