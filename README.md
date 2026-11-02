@@ -131,3 +131,7 @@ Le logo source est [`assets/brand/capyboard-logo-source.webp`](assets/brand/capy
 - `icon.png` : le buste du capybara (sans le texte, illisible en petit) sur le jaune du soleil `#FDD447` ;
 - `android-icon-foreground.png` : le même buste, réduit pour tenir dans le cercle de l'icône adaptative Android (fond `#FDD447`) ;
 - `favicon.png` : le buste en 48 px.
+
+## Avatars
+
+Les 20 avatars capybara viennent de la planche [`assets/brand/avatars-source.webp`](assets/brand/avatars-source.webp) (5 × 4). Son fond en damier faisait partie de l'image : chaque avatar a été détouré (fond retiré depuis les bords, arrêté par le contour noir du dessin), recadré et réduit en 256 × 256 dans [`assets/avatars/`](assets/avatars). Un profil enregistre `capy:<nom>` pour un avatar illustré, ou directement un emoji.

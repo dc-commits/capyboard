@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
-import { AVATAR_COLORS, AVATARS } from '@/data/avatars';
+import { AVATAR_COLORS, CAPY_AVATARS, EMOJI_AVATARS } from '@/data/avatars';
 import type { PlayerInput } from '@/store/players';
 import { colors, common } from '@/theme';
 
@@ -35,7 +35,22 @@ export function PlayerForm({ initial, submitLabel, onSubmit }: Props) {
 
       <Text style={common.sectionTitle}>Avatar</Text>
       <View style={styles.grid}>
-        {AVATARS.map((value) => (
+        {CAPY_AVATARS.map((value) => (
+          <Pressable
+            key={value}
+            accessibilityRole="radio"
+            accessibilityLabel={`Capybara ${value.split(':')[1]}`}
+            accessibilityState={{ selected: value === avatar }}
+            onPress={() => setAvatar(value)}
+            style={[styles.capyOption, value === avatar && styles.selected]}
+          >
+            <Avatar avatar={value} color={color} size={52} />
+          </Pressable>
+        ))}
+      </View>
+      <Text style={styles.subLabel}>Ou un emoji</Text>
+      <View style={styles.grid}>
+        {EMOJI_AVATARS.map((value) => (
           <Pressable
             key={value}
             accessibilityRole="radio"
@@ -81,6 +96,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'transparent',
   },
+  capyOption: { borderRadius: 30, borderWidth: 3, borderColor: 'transparent', padding: 1 },
   selected: { borderColor: colors.primary },
+  subLabel: { fontSize: 12, color: colors.muted },
   emoji: { fontSize: 24 },
 });
