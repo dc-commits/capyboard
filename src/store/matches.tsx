@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { Game, RoundDetail, TieBreaker } from '@/data/games';
+import type { EndCondition, Game, RoundDetail, TieBreaker } from '@/data/games';
 
 export type Match = {
   id: string;
@@ -18,9 +18,12 @@ type MatchesContextValue = {
   matches: Match[];
   loaded: boolean;
   createMatch: (gameId: string, players: string[]) => Match;
-  addRound: (matchId: string, scores: number[], details?: RoundDetail[]) => void;
+  /** Ajoute une manche et termine la partie si la condition de fin est atteinte */
+  addRound: (matchId: string, round: { scores: number[]; details?: RoundDetail[] }, endCondition: EndCondition) => void;
+  /** Supprime une manche ; la partie redevient en cours */
   removeRound: (matchId: string, roundIndex: number) => void;
   finishMatch: (matchId: string) => void;
+  resumeMatch: (matchId: string) => void;
   deleteMatch: (matchId: string) => void;
 };
 
@@ -64,19 +67,24 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
         setMatches((current) => [match, ...current]);
         return match;
       },
-      addRound: (matchId, scores, details) =>
-        updateMatch(matchId, (match) => ({
-          ...match,
-          rounds: [...match.rounds, scores],
-          ...(details && { details: [...(match.details ?? []), details] }),
-        })),
+      addRound: (matchId, { scores, details }, endCondition) =>
+        updateMatch(matchId, (match) => {
+          const next: Match = {
+            ...match,
+            rounds: [...match.rounds, scores],
+            ...(details && { details: [...(match.details ?? []), details] }),
+          };
+          return isGameOver(next, endCondition) ? { ...next, finishedAt: new Date().toISOString() } : next;
+        }),
       removeRound: (matchId, roundIndex) =>
         updateMatch(matchId, (match) => ({
           ...match,
+          finishedAt: null,
           rounds: match.rounds.filter((_, index) => index !== roundIndex),
           ...(match.details && { details: match.details.filter((_, index) => index !== roundIndex) }),
         })),
       finishMatch: (matchId) => updateMatch(matchId, (match) => ({ ...match, finishedAt: new Date().toISOString() })),
+      resumeMatch: (matchId) => updateMatch(matchId, (match) => ({ ...match, finishedAt: null })),
       deleteMatch: (matchId) => setMatches((current) => current.filter((match) => match.id !== matchId)),
     }),
     [matches, loaded, updateMatch],
@@ -93,6 +101,44 @@ export function useMatches(): MatchesContextValue {
 
 export function getTotals(match: Match): number[] {
   return match.players.map((_, playerIndex) => match.rounds.reduce((sum, round) => sum + (round[playerIndex] ?? 0), 0));
+}
+
+export function isGameOver(match: Match, endCondition: EndCondition): boolean {
+  if (endCondition.type === 'rounds') return match.rounds.length >= endCondition.count;
+  return getTotals(match).some((total) => total >= endCondition.points);
+}
+
+function joinNames(names: string[]): string {
+  return names.length > 1 ? `${names.slice(0, -1).join(', ')} et ${names[names.length - 1]}` : (names[0] ?? '');
+}
+
+/** Où en est une partie en cours par rapport à sa condition de fin */
+export function getProgress(match: Match, game: Game): string {
+  const { endCondition } = game;
+  if (endCondition.type === 'rounds') {
+    const next = match.rounds.length + 1;
+    return next >= endCondition.count
+      ? `Manche ${next} sur ${endCondition.count} · dernière manche !`
+      : `Manche ${next} sur ${endCondition.count}`;
+  }
+  if (match.rounds.length === 0) return `La partie s’arrête quand un joueur atteint ${endCondition.points} points`;
+  const totals = getTotals(match);
+  const max = Math.max(...totals);
+  const closest = match.players.filter((_, index) => totals[index] === max);
+  return `Fin à ${endCondition.points} points · ${joinNames(closest)} : ${max}`;
+}
+
+/** Pourquoi une partie terminée s'est arrêtée */
+export function getEndReason(match: Match, game: Game): string {
+  const { endCondition } = game;
+  const played = `${match.rounds.length} manche${match.rounds.length > 1 ? 's' : ''}`;
+  if (endCondition.type === 'rounds') {
+    return match.rounds.length >= endCondition.count ? `Partie terminée en ${played}` : `Partie arrêtée après ${played}`;
+  }
+  const totals = getTotals(match);
+  const reached = match.players.filter((_, index) => totals[index] >= endCondition.points);
+  if (reached.length === 0) return `Partie arrêtée après ${played}, avant ${endCondition.points} points`;
+  return `${joinNames(reached)} ${reached.length > 1 ? 'ont' : 'a'} atteint ${endCondition.points} points en ${played}`;
 }
 
 /** Total d'un critère de départage pour chaque joueur, sur toutes les manches détaillées */

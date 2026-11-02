@@ -34,6 +34,9 @@ export type DetailedScoring = {
   tieBreakers: TieBreaker[];
 };
 
+/** Quand la partie s'arrête : un joueur atteint un seuil, ou un nombre fixe de manches */
+export type EndCondition = { type: 'threshold'; points: number } | { type: 'rounds'; count: number };
+
 export type Game = {
   id: string;
   name: string;
@@ -42,6 +45,7 @@ export type Game = {
   duration: string;
   /** Qui gagne : le plus haut total ou le plus bas */
   winner: 'highest' | 'lowest';
+  endCondition: EndCondition;
   /** Sans ce champ, on saisit directement un score par joueur et par manche */
   scoring?: DetailedScoring;
   rules: RuleSection[];
@@ -62,6 +66,7 @@ export const GAMES: Game[] = [
     players: '2 à 8 joueurs',
     duration: '30 min',
     winner: 'lowest',
+    endCondition: { type: 'threshold', points: 100 },
     rules: [
       {
         title: 'But du jeu',
@@ -115,6 +120,7 @@ export const GAMES: Game[] = [
     players: '2 à 6 joueurs',
     duration: '20 min',
     winner: 'highest',
+    endCondition: { type: 'rounds', count: 2 },
     scoring: {
       fields: [
         { key: 'sum', label: 'Somme', icon: '🧘', signed: true },
@@ -214,6 +220,7 @@ export const GAMES: Game[] = [
     players: '3 joueurs et plus',
     duration: '20 min',
     winner: 'highest',
+    endCondition: { type: 'threshold', points: 200 },
     rules: [
       {
         title: 'But du jeu',

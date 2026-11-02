@@ -4,12 +4,12 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, Te
 import { Button } from '@/components/Button';
 import { DetailedRoundEntry, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
 import { getGame } from '@/data/games';
-import { getTieBreakerTotals, getTotals, getWinners, useMatches } from '@/store/matches';
+import { getEndReason, getProgress, getTieBreakerTotals, getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
 export default function MatchScreen() {
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
-  const { matches, addRound, removeRound, finishMatch, deleteMatch } = useMatches();
+  const { matches, addRound, removeRound, finishMatch, resumeMatch, deleteMatch } = useMatches();
   const match = matches.find((candidate) => candidate.id === matchId);
   const game = match ? getGame(match.gameId) : undefined;
   const [draft, setDraft] = useState<string[]>([]);
@@ -35,14 +35,10 @@ export default function MatchScreen() {
   const submitRound = () => {
     if (scoring) {
       if (!completeDetails) return;
-      addRound(
-        match.id,
-        completeDetails.map((detail) => scoring.compute(detail)),
-        completeDetails,
-      );
+      addRound(match.id, { scores: completeDetails.map((detail) => scoring.compute(detail)), details: completeDetails }, game.endCondition);
       setDetailDraft([]);
     } else {
-      addRound(match.id, parsed);
+      addRound(match.id, { scores: parsed }, game.endCondition);
       setDraft([]);
     }
   };
@@ -70,6 +66,7 @@ export default function MatchScreen() {
     <KeyboardAvoidingView style={common.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Stack.Screen options={{ title: `${game.emoji} ${game.name}` }} />
       <ScrollView contentContainerStyle={common.content} keyboardShouldPersistTaps="handled">
+        {!match.finishedAt && <Text style={styles.progress}>{getProgress(match, game)}</Text>}
         <View style={common.card}>
           <View style={styles.row}>
             <Text style={[styles.cell, styles.roundCell, styles.head]}>#</Text>
@@ -171,11 +168,10 @@ export default function MatchScreen() {
               🏆 {leaders.map((index) => match.players[index]).join(' & ')} {leaders.length > 1 ? 'gagnent' : 'gagne'} !
             </Text>
             {decidedBy && <Text style={common.subtitle}>Égalité départagée par {decidedBy}</Text>}
-            <Text style={common.subtitle}>
-              Partie terminée en {match.rounds.length} manche{match.rounds.length > 1 ? 's' : ''}
-            </Text>
+            <Text style={common.subtitle}>{getEndReason(match, game)}</Text>
           </View>
         )}
+        {match.finishedAt && <Button label="Reprendre la partie" variant="secondary" onPress={() => resumeMatch(match.id)} />}
         <Button label="Supprimer la partie" variant="danger" onPress={confirmDelete} />
       </ScrollView>
     </KeyboardAvoidingView>
@@ -194,6 +190,7 @@ const styles = StyleSheet.create({
   total: { fontWeight: '700', fontSize: 18 },
   detail: { fontSize: 11, fontWeight: '400', color: colors.muted },
   leader: { color: colors.success },
+  progress: { fontSize: 14, fontWeight: '600', color: colors.primary, textAlign: 'center' },
   hint: { fontSize: 13, color: colors.muted, textAlign: 'center' },
   result: { alignItems: 'center', gap: 4 },
 });

@@ -24,6 +24,12 @@ export default function GameScreen() {
           {game.players} · {game.duration}
         </Text>
         <Text style={common.subtitle}>Gagnant : {game.winner === 'highest' ? 'le plus haut score' : 'le plus petit score'}</Text>
+        <Text style={common.subtitle}>
+          Fin :{' '}
+          {game.endCondition.type === 'rounds'
+            ? `après ${game.endCondition.count} manches`
+            : `dès qu’un joueur atteint ${game.endCondition.points} points`}
+        </Text>
       </View>
 
       <Button
