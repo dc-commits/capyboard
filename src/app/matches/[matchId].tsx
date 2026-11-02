@@ -151,6 +151,7 @@ export default function MatchScreen() {
           <DetailedRoundEntry
             scoring={scoring}
             players={match.players}
+            avatars={match.players.map((_, index) => (match.playerIds ? getPlayer(match.playerIds[index]) : undefined))}
             roundNumber={match.rounds.length + 1}
             draft={detailDraft}
             onChange={setDetailDraft}

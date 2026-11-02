@@ -14,6 +14,8 @@ type ScoreFieldBase = {
   icon: string;
   /** Clé d'une case à cocher qui, cochée, neutralise ce champ (valeur 0) */
   disabledWhen?: string;
+  /** Les cases d'un même groupe s'affichent en grille de cartes sous ce titre */
+  group?: string;
 };
 
 export type ScoreField =
@@ -51,6 +53,12 @@ export type DetailedScoring = {
   compute: (detail: RoundDetail, round: (RoundDetail | null)[]) => number | null;
   /** Critères de départage en cas d'égalité, appliqués dans l'ordre */
   tieBreakers: TieBreaker[];
+  /** `modal` : une ligne par joueur, la saisie s'ouvre dans une fenêtre (pratique pour beaucoup de champs) */
+  entry?: 'inline' | 'modal';
+  /** Nombre maximum de cases cochées par groupe */
+  groupLimits?: Record<string, number>;
+  /** Indication affichée pendant la saisie d'un joueur */
+  hint?: (detail: RoundDetail) => string | null;
 };
 
 /** Quand la partie s'arrête : un joueur atteint un seuil, ou un nombre fixe de manches */
@@ -69,6 +77,21 @@ export type Game = {
   scoring?: DetailedScoring;
   rules: RuleSection[];
 };
+
+const FLIP7_NUMBERS = Array.from({ length: 13 }, (_, value) => value);
+const FLIP7_BONUSES = [2, 4, 6, 8, 10];
+
+function flip7NumberCount(detail: RoundDetail): number {
+  return FLIP7_NUMBERS.filter((value) => detail[`n${value}`]).length;
+}
+
+/** Flip 7 : numéros (doublés par le ×2), puis bonus, puis 15 points pour 7 numéros différents */
+function flip7Score(detail: RoundDetail): number {
+  if (detail.bust) return 0;
+  const numbers = FLIP7_NUMBERS.reduce((sum, value) => sum + (detail[`n${value}`] ? value : 0), 0);
+  const bonus = FLIP7_BONUSES.reduce((sum, value) => sum + (detail[`b${value}`] ? value : 0), 0);
+  return numbers * (detail.double ? 2 : 1) + bonus + (flip7NumberCount(detail) === 7 ? 15 : 0);
+}
 
 /** Capybaraka : 1, 3, 6, 10, 15 points pour 1 à 5 cartes Fiesta, puis +5 par carte */
 export function capybarakaFiestaPoints(cards: number): number {
@@ -255,15 +278,34 @@ export const GAMES: Game[] = [
     winner: 'highest',
     endCondition: { type: 'threshold', points: 200 },
     scoring: {
+      entry: 'modal',
       fields: [
-        { kind: 'number', key: 'numbers', label: 'Numéros', icon: '🔢', signed: false, disabledWhen: 'bust' },
-        { kind: 'number', key: 'bonus', label: 'Bonus +', icon: '➕', signed: false, optional: true, disabledWhen: 'bust' },
-        { kind: 'toggle', key: 'double', label: 'Doublé', icon: '×2', disabledWhen: 'bust' },
-        { kind: 'toggle', key: 'flip7', label: 'Flip 7', icon: '7️⃣', disabledWhen: 'bust' },
+        ...FLIP7_NUMBERS.map((value): ScoreField => ({
+          kind: 'toggle',
+          key: `n${value}`,
+          label: String(value),
+          icon: String(value),
+          group: 'Numéros',
+          disabledWhen: 'bust',
+        })),
+        ...FLIP7_BONUSES.map((value): ScoreField => ({
+          kind: 'toggle',
+          key: `b${value}`,
+          label: `+${value}`,
+          icon: `+${value}`,
+          group: 'Bonus',
+          disabledWhen: 'bust',
+        })),
+        { kind: 'toggle', key: 'double', label: '×2', icon: '×2', group: 'Bonus', disabledWhen: 'bust' },
         { kind: 'toggle', key: 'bust', label: 'Sauté', icon: '💥' },
       ],
-      // Numéros (doublés par le ×2), puis bonus, puis 15 points pour un Flip 7
-      compute: ({ numbers, bonus, double, flip7, bust }) => (bust ? 0 : numbers * (double ? 2 : 1) + bonus + (flip7 ? 15 : 0)),
+      groupLimits: { Numéros: 7 },
+      compute: (detail) => flip7Score(detail),
+      hint: (detail) => {
+        if (detail.bust) return 'Sauté : 0 point pour cette manche';
+        const count = flip7NumberCount(detail);
+        return count === 7 ? 'Flip 7 ! +15 points' : `${count}/7 numéros`;
+      },
       tieBreakers: [],
     },
     rules: [
