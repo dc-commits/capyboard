@@ -14,7 +14,7 @@ export default function MatchScreen() {
   const contentStyle = useContentStyle();
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const { getPlayer } = usePlayers();
-  const { matches, addRound, removeRound, finishMatch, resumeMatch, deleteMatch } = useMatches();
+  const { matches, createMatch, addRound, removeRound, finishMatch, resumeMatch, deleteMatch } = useMatches();
   const match = matches.find((candidate) => candidate.id === matchId);
   const game = match ? getGame(match.gameId) : undefined;
   const [draft, setDraft] = useState<string[]>([]);
@@ -48,6 +48,15 @@ export default function MatchScreen() {
       addRound(match.id, { scores: parsed }, game.endCondition);
       setDraft([]);
     }
+  };
+
+  // Même jeu, mêmes joueurs, même ordre ; « retour » ramène à la fiche du jeu plutôt qu'à l'ancienne partie
+  const rematch = () => {
+    const next = createMatch(
+      game.id,
+      match.players.map((name, index) => ({ name, id: match.playerIds?.[index] })),
+    );
+    router.replace({ pathname: '/matches/[matchId]', params: { matchId: next.id } });
   };
 
   const confirmRemoveRound = (roundIndex: number) =>
@@ -181,7 +190,12 @@ export default function MatchScreen() {
             <Text style={common.subtitle}>{getEndReason(match, game)}</Text>
           </View>
         )}
-        {match.finishedAt && <Button label="Reprendre la partie" variant="secondary" onPress={() => resumeMatch(match.id)} />}
+        {match.finishedAt && (
+          <>
+            <Button label="🔁 Revanche" onPress={rematch} />
+            <Button label="Reprendre la partie" variant="secondary" onPress={() => resumeMatch(match.id)} />
+          </>
+        )}
         <Button label="Supprimer la partie" variant="danger" onPress={confirmDelete} />
       </ScrollView>
     </KeyboardAvoidingView>

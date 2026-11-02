@@ -22,7 +22,8 @@ export type Match = {
 type MatchesContextValue = {
   matches: Match[];
   loaded: boolean;
-  createMatch: (gameId: string, players: Pick<Player, 'id' | 'name'>[]) => Match;
+  /** Sans profil (parties d'avant les profils), `id` est absent */
+  createMatch: (gameId: string, players: (Pick<Player, 'name'> & Partial<Pick<Player, 'id'>>)[]) => Match;
   /** Ajoute une manche et termine la partie si la condition de fin est atteinte */
   addRound: (matchId: string, round: { scores: number[]; details?: RoundDetail[] }, endCondition: EndCondition) => void;
   /** Supprime une manche ; la partie redevient en cours */
@@ -69,7 +70,7 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
           createdAt: new Date().toISOString(),
           finishedAt: null,
           players: players.map((player) => player.name),
-          playerIds: players.map((player) => player.id),
+          ...(players.every((player) => player.id) && { playerIds: players.flatMap((player) => player.id ?? []) }),
           rounds: [],
         };
         setMatches((current) => [match, ...current]);
