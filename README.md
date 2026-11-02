@@ -119,10 +119,15 @@ L'APK écoute le canal `preview` d'EAS Update. Pour envoyer une évolution sans 
 npm run update:preview -- --message "Description de la nouveauté"
 ```
 
-Sur le téléphone : ouvrir l'app (téléchargement), la fermer complètement, la relancer (application).
+Sur le téléphone, l'app télécharge la mise à jour au lancement et affiche un bandeau « Nouvelle version prête » sur l'accueil : un toucher l'installe. L'écran « À propos » permet aussi de vérifier à la main.
 
-Un **nouveau build** reste nécessaire pour une librairie native, l'icône ou l'écran de démarrage. Dans ce cas, augmenter `version` (et `android.versionCode`) dans `app.json` : le runtime suit la version, ce qui évite d'envoyer une mise à jour à un APK incompatible.
+Un **nouveau build** reste nécessaire pour une librairie native, l'icône ou l'écran de démarrage, avec `android.versionCode` augmenté dans `app.json`. Pour une **librairie native**, augmenter aussi `version` : le runtime suit la version, ce qui évite d'envoyer une mise à jour à un APK incompatible. Un changement d'icône ou d'écran de démarrage ne touche pas au code et garde la même `version`.
 
-## Icônes
+## Logo et icônes
 
-Le logo est dessiné en SVG ([`assets/logo.svg`](assets/logo.svg)). Les PNG (`icon.png`, icônes Android adaptative et monochrome, `splash-icon.png`, `favicon.png`) en sont dérivés : la mascotte sur fond crème `#F6E7D2`, réduite à ~62 % pour l'icône adaptative.
+Le logo source est [`assets/brand/capyboard-logo-source.webp`](assets/brand/capyboard-logo-source.webp) (1254 × 1254, fond transparent). Les images de l'app en sont dérivées :
+
+- `logo.png` et `splash-icon.png` : le logo complet, recadré sur son contenu ;
+- `icon.png` : le buste du capybara (sans le texte, illisible en petit) sur le jaune du soleil `#FDD447` ;
+- `android-icon-foreground.png` : le même buste, réduit pour tenir dans le cercle de l'icône adaptative Android (fond `#FDD447`) ;
+- `favicon.png` : le buste en 48 px.

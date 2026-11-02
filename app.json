@@ -12,13 +12,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#F6E7D2",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#FDD447",
+        "foregroundImage": "./assets/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.dccommits.capyboard",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,7 +29,7 @@
         {
           "backgroundColor": "#F6E7D2",
           "image": "./assets/splash-icon.png",
-          "imageWidth": 200,
+          "imageWidth": 240,
           "resizeMode": "contain"
         }
       ]

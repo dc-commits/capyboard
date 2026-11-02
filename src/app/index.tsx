@@ -58,8 +58,12 @@ export default function GamesScreen() {
           <View style={styles.header}>
             {!searching && (
               <View style={styles.hero}>
-                <Image source={require('../../assets/logo.png')} style={styles.logo} accessibilityIgnoresInvertColors />
-                <Text style={styles.appName}>Capy Board</Text>
+                <Image
+                  source={require('../../assets/logo.png')}
+                  style={styles.logo}
+                  accessibilityLabel="Capy Board"
+                  accessibilityIgnoresInvertColors
+                />
                 <Text style={[common.subtitle, styles.tagline]}>Les règles et les scores de vos jeux, en toute zénitude</Text>
               </View>
             )}
@@ -196,9 +200,8 @@ function GameRow({ game, playedCount, favorite, onToggleFavorite }: GameRowProps
 const styles = StyleSheet.create({
   header: { gap: 8, paddingBottom: 4 },
   hero: { alignItems: 'center', gap: 4, paddingBottom: 8 },
-  logo: { width: 112, height: 112 },
+  logo: { width: 210, height: 211 },
   tagline: { textAlign: 'center' },
-  appName: { fontSize: 28, fontWeight: '800', color: colors.text },
   headerButton: { fontSize: 16, fontWeight: '600', color: colors.primary },
   search: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   searchInput: { flex: 1 },

@@ -35,8 +35,12 @@ export default function AboutScreen() {
   return (
     <ScrollView style={common.screen} contentContainerStyle={contentStyle}>
       <View style={[common.card, styles.header]}>
-        <Image source={require('../../assets/logo.png')} style={styles.logo} accessibilityIgnoresInvertColors />
-        <Text style={styles.appName}>Capy Board</Text>
+        <Image
+          source={require('../../assets/logo.png')}
+          style={styles.logo}
+          accessibilityLabel="Capy Board"
+          accessibilityIgnoresInvertColors
+        />
         <Text style={common.subtitle}>Version {Constants.expoConfig?.version ?? '–'}</Text>
       </View>
 
@@ -80,8 +84,7 @@ export default function AboutScreen() {
 
 const styles = StyleSheet.create({
   header: { alignItems: 'center', gap: 4 },
-  logo: { width: 88, height: 88 },
-  appName: { fontSize: 22, fontWeight: '800', color: colors.text },
+  logo: { width: 160, height: 161 },
   updates: { gap: 10 },
   body: { fontSize: 16, lineHeight: 23, color: colors.text },
   ready: { fontSize: 16, fontWeight: '700', color: colors.success },
