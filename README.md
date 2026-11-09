@@ -25,6 +25,7 @@ Application mobile (Android, iOS) pour lire les règles de ses jeux de société
 - **Parties en cours** sur l'accueil, pour reprendre en un toucher.
 - **Profils de joueurs** (avatar, couleur) et **statistiques** : victoires, meilleur score, moyenne par jeu.
 - **Classement général** tous jeux confondus (écran Joueurs) et **calendrier** des journées de jeu, avec le meilleur joueur de chaque jour et le champion du mois.
+- **Boîte à outils** (🧰 sur l'accueil et dans une partie) : dés d4 à d20, sablier avec alerte de fin, tirage du premier joueur (les joueurs de la partie, ou des profils et invités), pile ou face.
 - **Sauvegarde Google Drive** (Android) : connexion au compte Google, sauvegarde automatique quand on quitte l'app si quelque chose a changé, restauration sur un nouveau téléphone.
 
 ## Stack

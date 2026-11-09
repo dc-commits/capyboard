@@ -1,6 +1,6 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { DetailedRoundEntry, formatDetail, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
@@ -85,7 +85,21 @@ export default function MatchScreen() {
 
   return (
     <KeyboardAvoidingView style={common.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Stack.Screen options={{ title: `${game.emoji} ${game.name}` }} />
+      <Stack.Screen
+        options={{
+          title: `${game.emoji} ${game.name}`,
+          headerRight: () => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Boîte à outils"
+              hitSlop={10}
+              onPress={() => router.push({ pathname: '/tools', params: { matchId: match.id } })}
+            >
+              <Text style={styles.toolsButton}>🧰</Text>
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView contentContainerStyle={contentStyle} keyboardShouldPersistTaps="handled">
         {expansions.length > 0 && (
           <Text style={styles.expansions}>Avec {expansions.map((expansion) => `${expansion.emoji} ${expansion.name}`).join(', ')}</Text>
@@ -229,6 +243,7 @@ export default function MatchScreen() {
 }
 
 const styles = StyleSheet.create({
+  toolsButton: { fontSize: 22 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   roundRow: { paddingVertical: 6, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
   totalRow: { paddingTop: 10, marginTop: 4, borderTopWidth: 2, borderTopColor: colors.text },

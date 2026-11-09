@@ -53,6 +53,9 @@ export default function GamesScreen() {
           title: '',
           headerRight: () => (
             <View style={styles.headerButtons}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Boîte à outils" hitSlop={10} onPress={() => router.push('/tools')}>
+                <Text style={styles.headerButton}>🧰</Text>
+              </Pressable>
               <Pressable accessibilityRole="button" accessibilityLabel="Calendrier" hitSlop={10} onPress={() => router.push('/calendar')}>
                 <Text style={styles.headerButton}>📅</Text>
               </Pressable>
