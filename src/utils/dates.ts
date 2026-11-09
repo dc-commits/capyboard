@@ -24,3 +24,18 @@ export function formatMonth(month: Date): string {
   const label = month.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
+
+export type Period = 'month' | 'year' | 'all';
+
+export const PERIOD_LABELS: Record<Period, string> = {
+  month: 'Ce mois',
+  year: 'Cette année',
+  all: 'Toujours',
+};
+
+/** La date tombe-t-elle dans la période, comptée jusqu'à `now` ? */
+export function isInPeriod(date: Date, period: Period, now = new Date()): boolean {
+  if (period === 'all') return true;
+  if (date.getFullYear() !== now.getFullYear()) return false;
+  return period === 'year' || date.getMonth() === now.getMonth();
+}
