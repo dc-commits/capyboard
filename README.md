@@ -24,6 +24,7 @@ Application mobile (Android, iOS) pour lire les règles de ses jeux de société
 - **Fin de partie automatique** (seuil de points ou nombre de manches), reprise et revanche.
 - **Parties en cours** sur l'accueil, pour reprendre en un toucher.
 - **Profils de joueurs** (avatar, couleur) et **statistiques** : victoires, meilleur score, moyenne par jeu.
+- **Classement général** tous jeux confondus (écran Joueurs) et **calendrier** des journées de jeu, avec le meilleur joueur de chaque jour et le champion du mois.
 
 ## Stack
 

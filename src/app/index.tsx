@@ -52,9 +52,14 @@ export default function GamesScreen() {
         options={{
           title: '',
           headerRight: () => (
-            <Pressable accessibilityRole="button" hitSlop={10} onPress={() => router.push('/players')}>
-              <Text style={styles.headerButton}>👥 Joueurs</Text>
-            </Pressable>
+            <View style={styles.headerButtons}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Calendrier" hitSlop={10} onPress={() => router.push('/calendar')}>
+                <Text style={styles.headerButton}>📅</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" hitSlop={10} onPress={() => router.push('/players')}>
+                <Text style={styles.headerButton}>👥 Joueurs</Text>
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -222,6 +227,7 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'center', gap: 4, paddingBottom: 8 },
   logo: { width: 210, height: 211 },
   tagline: { textAlign: 'center' },
+  headerButtons: { flexDirection: 'row', alignItems: 'center', gap: 18 },
   headerButton: { fontSize: 16, fontWeight: '600', color: colors.primary },
   search: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   searchInput: { flex: 1 },

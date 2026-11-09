@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { OverallLeaderboard } from '@/components/OverallLeaderboard';
 import { useContentStyle } from '@/hooks/useContentStyle';
 import { useGames } from '@/store/games';
 import { useMatches } from '@/store/matches';
@@ -21,7 +22,12 @@ export default function PlayersScreen() {
       contentContainerStyle={contentStyle}
       data={players}
       keyExtractor={(player) => player.id}
-      ListHeaderComponent={<Button label="+ Nouveau joueur" onPress={() => router.push('/players/new')} />}
+      ListHeaderComponent={
+        <View style={styles.header}>
+          <Button label="+ Nouveau joueur" onPress={() => router.push('/players/new')} />
+          <OverallLeaderboard />
+        </View>
+      }
       ListEmptyComponent={
         <Text style={common.subtitle}>Aucun joueur pour l’instant. Crée un profil ici ou directement en lançant une partie.</Text>
       }
@@ -47,6 +53,7 @@ export default function PlayersScreen() {
 }
 
 const styles = StyleSheet.create({
+  header: { gap: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   pressed: { opacity: 0.7 },
   info: { flex: 1, gap: 2 },

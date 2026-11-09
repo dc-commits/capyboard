@@ -31,6 +31,7 @@ export default function RootLayout() {
               <Stack.Screen name="players/new" options={{ title: 'Nouveau joueur', presentation: 'modal' }} />
               <Stack.Screen name="players/[id]" options={{ title: '' }} />
               <Stack.Screen name="about" options={{ title: 'À propos' }} />
+              <Stack.Screen name="calendar" options={{ title: 'Calendrier' }} />
               <Stack.Screen name="library" options={{ title: 'Ajouter des jeux' }} />
               <Stack.Screen name="games/new" options={{ title: 'Créer un jeu', presentation: 'modal' }} />
               <Stack.Screen name="games/[id]/edit" options={{ title: 'Modifier le jeu', presentation: 'modal' }} />
