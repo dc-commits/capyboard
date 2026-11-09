@@ -21,6 +21,10 @@ export type Match = {
   expansionIds?: string[];
   /** Jeux sans score : joueurs désignés gagnants en fin de partie */
   winnerIndexes?: number[];
+  /** Scores masqués jusqu'à la révélation, pour garder le suspense (repris par la revanche) */
+  hiddenScores?: boolean;
+  /** Scores cachés déjà révélés en fin de partie */
+  revealed?: boolean;
 };
 
 type MatchesContextValue = {
@@ -36,6 +40,8 @@ type MatchesContextValue = {
   /** Jeux sans score : désigne le ou les gagnants et termine la partie */
   setWinners: (matchId: string, winnerIndexes: number[]) => void;
   resumeMatch: (matchId: string) => void;
+  setHiddenScores: (matchId: string, hidden: boolean) => void;
+  revealScores: (matchId: string) => void;
   deleteMatch: (matchId: string) => void;
   /** Répercute le nouveau nom d'un profil dans ses parties */
   renamePlayer: (playerId: string, name: string) => void;
@@ -104,6 +110,8 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
       setWinners: (matchId, winnerIndexes) =>
         updateMatch(matchId, (match) => ({ ...match, winnerIndexes, finishedAt: new Date().toISOString() })),
       resumeMatch: (matchId) => updateMatch(matchId, (match) => ({ ...match, finishedAt: null })),
+      setHiddenScores: (matchId, hidden) => updateMatch(matchId, (match) => ({ ...match, hiddenScores: hidden, revealed: false })),
+      revealScores: (matchId) => updateMatch(matchId, (match) => ({ ...match, revealed: true })),
       deleteMatch: (matchId) => setMatches((current) => current.filter((match) => match.id !== matchId)),
       renamePlayer: (playerId, name) =>
         setMatches((current) =>
@@ -124,6 +132,11 @@ export function useMatches(): MatchesContextValue {
   const context = useContext(MatchesContext);
   if (!context) throw new Error('useMatches must be used inside MatchesProvider');
   return context;
+}
+
+/** Scores masqués en ce moment : mode « scores cachés » et pas encore révélés */
+export function areScoresHidden(match: Match): boolean {
+  return !!match.hiddenScores && !match.revealed;
 }
 
 export function getTotals(match: Match): number[] {
@@ -152,6 +165,7 @@ export function getProgress(match: Match, game: Game): string {
   }
   if (endCondition.type === 'manual') return `Manche ${match.rounds.length + 1} · « Terminer la partie » quand vous le décidez`;
   if (match.rounds.length === 0) return `La partie s’arrête quand un joueur atteint ${endCondition.points} points`;
+  if (areScoresHidden(match)) return `Fin à ${endCondition.points} points · 🙈 scores cachés`;
   const totals = getTotals(match);
   const max = Math.max(...totals);
   const closest = match.players.filter((_, index) => totals[index] === max);

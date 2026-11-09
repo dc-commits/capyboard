@@ -22,6 +22,7 @@ Application mobile (Android, iOS) pour lire les règles de ses jeux de société
   - Mycelia et Service compris ! : jeux sans score, on désigne simplement le ou les gagnants.
 - **Extensions** : choisies au lancement de la partie (Mycelia – Prisma), avec leurs règles dans un onglet à part.
 - **Fin de partie automatique** (seuil de points ou nombre de manches), reprise et revanche.
+- **Scores cachés** (au choix, à tout moment) : manches et totaux masqués jusqu'à la fin, puis révélation d'un coup ; la revanche garde le mode.
 - **Parties en cours** sur l'accueil, pour reprendre en un toucher.
 - **Profils de joueurs** (avatar, couleur) et **statistiques** : victoires, meilleur score, moyenne par jeu.
 - **Classement général** tous jeux confondus (écran Joueurs) et **calendrier** des journées de jeu, avec le meilleur joueur de chaque jour et le champion du mois.

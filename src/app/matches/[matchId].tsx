@@ -1,6 +1,6 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { DetailedRoundEntry, formatDetail, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
@@ -8,7 +8,7 @@ import { WinnerPicker } from '@/components/WinnerPicker';
 import { useContentStyle } from '@/hooks/useContentStyle';
 import { useGames } from '@/store/games';
 import { usePlayers } from '@/store/players';
-import { getEndReason, getProgress, getTieBreakerTotals, getTotals, getWinners, useMatches } from '@/store/matches';
+import { areScoresHidden, getEndReason, getProgress, getTieBreakerTotals, getTotals, getWinners, useMatches } from '@/store/matches';
 import { colors, common } from '@/theme';
 
 export default function MatchScreen() {
@@ -16,7 +16,8 @@ export default function MatchScreen() {
   const contentStyle = useContentStyle();
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const { getPlayer } = usePlayers();
-  const { matches, createMatch, addRound, removeRound, finishMatch, setWinners, resumeMatch, deleteMatch } = useMatches();
+  const { matches, createMatch, addRound, removeRound, finishMatch, setWinners, resumeMatch, setHiddenScores, revealScores, deleteMatch } =
+    useMatches();
   const match = matches.find((candidate) => candidate.id === matchId);
   const game = match ? getGame(match.gameId) : undefined;
   const [draft, setDraft] = useState<string[]>([]);
@@ -29,6 +30,9 @@ export default function MatchScreen() {
   const { scoring } = game;
   const expansions = game.expansions?.filter((expansion) => match.expansionIds?.includes(expansion.id)) ?? [];
   const avatars = match.players.map((_, index) => (match.playerIds ? getPlayer(match.playerIds[index]) : undefined));
+  // Scores cachés : manches et totaux masqués jusqu'à la révélation, une fois la partie finie
+  const hidden = !game.scoreless && areScoresHidden(match);
+  const awaitingReveal = hidden && !!match.finishedAt;
 
   // Saisie simple : un score par joueur
   const values = match.players.map((_, index) => draft[index] ?? '');
@@ -61,6 +65,7 @@ export default function MatchScreen() {
       match.players.map((name, index) => ({ name, id: match.playerIds?.[index] })),
       match.expansionIds,
     );
+    if (match.hiddenScores) setHiddenScores(next.id, true);
     router.replace({ pathname: '/matches/[matchId]', params: { matchId: next.id } });
   };
 
@@ -113,6 +118,20 @@ export default function MatchScreen() {
             onConfirm={(winnerIndexes) => setWinners(match.id, winnerIndexes)}
           />
         )}
+        {!game.scoreless && !match.finishedAt && (
+          <View style={[common.card, styles.hiddenToggle]}>
+            <View style={styles.hiddenText}>
+              <Text style={styles.hiddenTitle}>🙈 Scores cachés</Text>
+              <Text style={common.subtitle}>Les totaux restent secrets jusqu’à la fin de la partie.</Text>
+            </View>
+            <Switch
+              value={hidden}
+              onValueChange={(value) => setHiddenScores(match.id, value)}
+              trackColor={{ true: colors.primary, false: colors.border }}
+              accessibilityLabel="Scores cachés"
+            />
+          </View>
+        )}
         {!game.scoreless && (
           <>
             <View style={common.card}>
@@ -139,9 +158,13 @@ export default function MatchScreen() {
                   {round.map((score, playerIndex) => {
                     const detail = match.details?.[roundIndex]?.[playerIndex];
                     return (
-                      <Text key={playerIndex} style={styles.cell} onLongPress={() => confirmRemoveRound(roundIndex)}>
-                        {score}
-                        {scoring && detail && <Text style={styles.detail}>{'\n' + formatDetail(scoring, detail)}</Text>}
+                      <Text
+                        key={playerIndex}
+                        style={[styles.cell, hidden && styles.masked]}
+                        onLongPress={() => confirmRemoveRound(roundIndex)}
+                      >
+                        {hidden ? '•••' : score}
+                        {!hidden && scoring && detail && <Text style={styles.detail}>{'\n' + formatDetail(scoring, detail)}</Text>}
                       </Text>
                     );
                   })}
@@ -168,15 +191,21 @@ export default function MatchScreen() {
 
               <View style={[styles.row, styles.totalRow]}>
                 <Text style={[styles.cell, styles.roundCell, styles.head]}>Σ</Text>
-                {totals.map((total, index) => (
-                  <Text key={index} style={[styles.cell, styles.total, leaders.includes(index) && styles.leader]}>
-                    {leaders.includes(index) ? '🏆 ' : ''}
-                    {total}
-                  </Text>
-                ))}
+                {totals.map((total, index) =>
+                  hidden ? (
+                    <Text key={index} style={[styles.cell, styles.total, styles.masked]}>
+                      ?
+                    </Text>
+                  ) : (
+                    <Text key={index} style={[styles.cell, styles.total, leaders.includes(index) && styles.leader]}>
+                      {leaders.includes(index) ? '🏆 ' : ''}
+                      {total}
+                    </Text>
+                  ),
+                )}
               </View>
 
-              {scoring && scoring.tieBreakers.length > 0 && match.details && match.details.length > 0 && (
+              {!hidden && scoring && scoring.tieBreakers.length > 0 && match.details && match.details.length > 0 && (
                 <View style={styles.row}>
                   <Text style={[styles.cell, styles.roundCell]} />
                   {match.players.map((_, playerIndex) => (
@@ -219,7 +248,17 @@ export default function MatchScreen() {
             )}
           </>
         )}
-        {match.finishedAt && (
+        {awaitingReveal && (
+          <View style={[common.card, styles.result, styles.reveal]}>
+            <Text style={styles.drumroll}>🥁</Text>
+            <Text style={common.title}>Partie terminée !</Text>
+            <Text style={common.subtitle}>Tout le monde est prêt pour le verdict ?</Text>
+            <View style={styles.revealButton}>
+              <Button label="🎉 Révéler les scores" onPress={() => revealScores(match.id)} />
+            </View>
+          </View>
+        )}
+        {match.finishedAt && !awaitingReveal && (
           <>
             <View style={[common.card, styles.result]}>
               <Text style={common.title}>
@@ -260,4 +299,11 @@ const styles = StyleSheet.create({
   progress: { fontSize: 14, fontWeight: '600', color: colors.primary, textAlign: 'center' },
   hint: { fontSize: 13, color: colors.muted, textAlign: 'center' },
   result: { alignItems: 'center', gap: 4 },
+  hiddenToggle: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  hiddenText: { flex: 1, gap: 2 },
+  hiddenTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  masked: { color: colors.muted, letterSpacing: 1 },
+  reveal: { paddingVertical: 20, gap: 8 },
+  drumroll: { fontSize: 44 },
+  revealButton: { alignSelf: 'stretch', marginTop: 8 },
 });
