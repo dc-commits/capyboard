@@ -6,12 +6,9 @@ import { useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { getOverallLeaderboard } from '@/store/stats';
 import { colors, common } from '@/theme';
+import { plural } from '@/utils/text';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
-
-function plural(count: number, word: string): string {
-  return `${count} ${word}${count > 1 ? 's' : ''}`;
-}
 
 /** Classement des profils tous jeux confondus */
 export function OverallLeaderboard() {
@@ -41,7 +38,7 @@ export function OverallLeaderboard() {
                 {player.name}
               </Text>
               <Text style={common.subtitle}>
-                {plural(played, 'partie')} · {plural(gamesPlayed, 'jeu')}
+                {plural(played, 'partie')} · {plural(gamesPlayed, 'jeu', 'jeux')}
               </Text>
             </View>
             <View style={styles.score}>

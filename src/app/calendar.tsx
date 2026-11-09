@@ -9,12 +9,9 @@ import { usePlayers } from '@/store/players';
 import { getDaySummaries, type DaySummary, type DayWinner } from '@/store/stats';
 import { colors, common } from '@/theme';
 import { dayKey, formatMonth, monthGrid } from '@/utils/dates';
+import { plural } from '@/utils/text';
 
 const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-
-function plural(count: number, word: string): string {
-  return `${count} ${word}${count > 1 ? 's' : ''}`;
-}
 
 /** Calendrier des journées de jeu, avec le meilleur joueur de chaque jour */
 export default function CalendarScreen() {
@@ -118,6 +115,13 @@ export default function CalendarScreen() {
   );
 }
 
+/** « 🏆 David · avec Léa, Max » : le ou les vainqueurs, puis les autres joueurs (sans doublon) */
+function finishedLine(players: string[], leaders: number[]): string {
+  const winners = leaders.map((index) => players[index]).join(' & ') || '—';
+  const others = players.filter((_, index) => !leaders.includes(index));
+  return others.length > 0 ? `🏆 ${winners} · avec ${others.join(', ')}` : `🏆 ${winners}`;
+}
+
 /** Cumule les victoires du mois par joueur et garde le ou les meilleurs */
 function monthChampions(winners: DayWinner[]): DayWinner[] {
   const totals = new Map<string, DayWinner>();
@@ -172,9 +176,7 @@ function DayDetails({ summary, getGame, avatarOf }: DayDetailsProps) {
               </Text>
             </Text>
             <Text style={common.subtitle}>
-              {match.finishedAt
-                ? `🏆 ${leaders.map((index) => match.players[index]).join(' & ') || '—'} · avec ${match.players.join(', ')}`
-                : `En cours · ${match.players.join(', ')}`}
+              {match.finishedAt ? finishedLine(match.players, leaders) : `En cours · ${match.players.join(', ')}`}
             </Text>
           </Pressable>
         );

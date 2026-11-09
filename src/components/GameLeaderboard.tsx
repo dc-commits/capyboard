@@ -6,16 +6,13 @@ import { useMatches } from '@/store/matches';
 import { usePlayers } from '@/store/players';
 import { getGameLeaderboard } from '@/store/stats';
 import { colors, common } from '@/theme';
+import { plural } from '@/utils/text';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
 /** « 67 % » avec une espace insécable, pour que le % ne passe pas à la ligne */
 function winRate(wins: number, played: number): string {
   return `${Math.round((wins / played) * 100)}\u00a0%`;
-}
-
-function plural(count: number, word: string): string {
-  return `${count} ${word}${count > 1 ? 's' : ''}`;
 }
 
 export function GameLeaderboard({ game }: { game: Game }) {
