@@ -21,7 +21,10 @@ export default function CalendarScreen() {
   const { getPlayer } = usePlayers();
   const today = new Date();
   const [month, setMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
-  const [selected, setSelected] = useState(() => dayKey(today));
+  const todayKey = dayKey(today);
+  const [selected, setSelected] = useState(todayKey);
+  // On ne navigue pas au-delà du mois en cours : il n'y a encore rien à y voir
+  const isCurrentMonth = month.getFullYear() === today.getFullYear() && month.getMonth() === today.getMonth();
 
   const summaries = getDaySummaries(matches, games);
   const weeks = monthGrid(month);
@@ -42,8 +45,15 @@ export default function CalendarScreen() {
             <Text style={styles.arrow}>‹</Text>
           </Pressable>
           <Text style={common.title}>{formatMonth(month)}</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel="Mois suivant" hitSlop={12} onPress={() => changeMonth(1)}>
-            <Text style={styles.arrow}>›</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Mois suivant"
+            accessibilityState={{ disabled: isCurrentMonth }}
+            disabled={isCurrentMonth}
+            hitSlop={12}
+            onPress={() => changeMonth(1)}
+          >
+            <Text style={[styles.arrow, isCurrentMonth && styles.disabled]}>›</Text>
           </Pressable>
         </View>
 
@@ -62,22 +72,25 @@ export default function CalendarScreen() {
               const summary = summaries.get(key);
               const topWinner = summary?.winners[0];
               const profile = topWinner && avatarOf(topWinner);
+              // Les dates s'écrivent AAAA-MM-JJ : l'ordre alphabétique est l'ordre chronologique
+              const future = key > todayKey;
               return (
                 <Pressable
                   key={dayIndex}
                   accessibilityRole="button"
                   accessibilityLabel={`${date.getDate()}${summary ? `, ${plural(summary.matches.length, 'partie')}` : ''}`}
-                  accessibilityState={{ selected: key === selected }}
+                  accessibilityState={{ selected: key === selected, disabled: future }}
+                  disabled={future}
                   onPress={() => setSelected(key)}
                   style={[
                     styles.cell,
                     styles.day,
                     summary && styles.played,
-                    key === dayKey(today) && styles.today,
+                    key === todayKey && styles.today,
                     key === selected && styles.selected,
                   ]}
                 >
-                  <Text style={[styles.dayNumber, summary && styles.playedNumber]}>{date.getDate()}</Text>
+                  <Text style={[styles.dayNumber, summary && styles.playedNumber, future && styles.disabled]}>{date.getDate()}</Text>
                   {profile ? (
                     <Avatar avatar={profile.avatar} color={profile.color} size={22} />
                   ) : summary ? (
@@ -196,6 +209,7 @@ const styles = StyleSheet.create({
   today: { borderWidth: 1.5, borderColor: colors.muted },
   selected: { borderWidth: 2, borderColor: colors.primary },
   dayNumber: { fontSize: 14, color: colors.text },
+  disabled: { opacity: 0.3 },
   playedNumber: { fontWeight: '800' },
   dayMark: { fontSize: 14 },
   monthStats: { gap: 4 },
