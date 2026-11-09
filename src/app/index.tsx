@@ -170,9 +170,15 @@ export default function GamesScreen() {
               </View>
             )}
             <Button label="➕  Ajouter des jeux" variant="secondary" onPress={() => router.push('/library')} />
-            <Pressable accessibilityRole="link" onPress={() => router.push('/about')} style={styles.about} hitSlop={8}>
-              <Text style={styles.footerText}>À propos · Mises à jour</Text>
-            </Pressable>
+            <View style={styles.links}>
+              <Pressable accessibilityRole="link" onPress={() => router.push('/backup')} hitSlop={8}>
+                <Text style={styles.footerText}>☁️ Sauvegarde</Text>
+              </Pressable>
+              <Text style={styles.footerText}>·</Text>
+              <Pressable accessibilityRole="link" onPress={() => router.push('/about')} hitSlop={8}>
+                <Text style={styles.footerText}>À propos · Mises à jour</Text>
+              </Pressable>
+            </View>
           </View>
         }
         renderItem={({ item: game }) => (
@@ -244,7 +250,7 @@ const styles = StyleSheet.create({
   info: { flex: 1, gap: 2 },
   footer: { gap: 12, paddingTop: 4 },
   catalog: { gap: 12, marginTop: 8 },
-  about: { alignSelf: 'center' },
+  links: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
   footerText: { fontSize: 14, fontWeight: '600', color: colors.muted },
   star: { fontSize: 26, color: colors.muted },
   starOn: { color: colors.star },

@@ -6,7 +6,7 @@
 
 <p align="center">Les règles et les scores de vos jeux de société, en toute zénitude 🦫🍊</p>
 
-Application mobile (Android, iOS) pour lire les règles de ses jeux de société et tenir la feuille de score des parties. Tout reste sur le téléphone : pas de compte, pas de serveur, ça marche hors ligne.
+Application mobile (Android, iOS) pour lire les règles de ses jeux de société et tenir la feuille de score des parties. Tout reste sur le téléphone : pas de compte, pas de serveur, ça marche hors ligne. Seule exception, facultative : la sauvegarde dans son propre Google Drive.
 
 ## Fonctionnalités
 
@@ -25,6 +25,7 @@ Application mobile (Android, iOS) pour lire les règles de ses jeux de société
 - **Parties en cours** sur l'accueil, pour reprendre en un toucher.
 - **Profils de joueurs** (avatar, couleur) et **statistiques** : victoires, meilleur score, moyenne par jeu.
 - **Classement général** tous jeux confondus (écran Joueurs) et **calendrier** des journées de jeu, avec le meilleur joueur de chaque jour et le champion du mois.
+- **Sauvegarde Google Drive** (Android) : connexion au compte Google, sauvegarde automatique quand on quitte l'app si quelque chose a changé, restauration sur un nouveau téléphone.
 
 ## Stack
 
@@ -123,6 +124,28 @@ npm run update:preview -- --message "Description de la nouveauté"
 Sur le téléphone, l'app télécharge la mise à jour au lancement et affiche un bandeau « Nouvelle version prête » sur l'accueil : un toucher l'installe. L'écran « À propos » permet aussi de vérifier à la main.
 
 Un **nouveau build** reste nécessaire pour une librairie native, l'icône ou l'écran de démarrage, avec `android.versionCode` augmenté dans `app.json`. Pour une **librairie native**, augmenter aussi `version` : le runtime suit la version, ce qui évite d'envoyer une mise à jour à un APK incompatible. Un changement d'icône ou d'écran de démarrage ne touche pas au code et garde la même `version`.
+
+## Sauvegarde Google Drive
+
+L'écran « Sauvegarde » (en bas de l'accueil) range toutes les données (clés AsyncStorage `capyboard/…`) dans un fichier `Capy Board - sauvegarde.json` du Drive de l'utilisateur. Le code est dans [`src/backup/`](src/backup) et [`src/store/backup.tsx`](src/store/backup.tsx) :
+
+- connexion avec [`@react-native-google-signin/google-signin`](https://react-native-google-signin.github.io/) (API « Original », gratuite), scope `drive.file` : l'app ne voit que les fichiers qu'elle a créés ;
+- appels directs à l'API REST Google Drive v3 avec le jeton d'accès ;
+- sauvegarde automatique quand l'app passe en arrière-plan, seulement si les données ont changé, et seulement une fois ce téléphone lié à la sauvegarde (première sauvegarde ou restauration), pour ne jamais écraser la sauvegarde d'un autre téléphone sans le demander ;
+- une restauration remplace les données puis relance l'app.
+
+Configuration Google Cloud (une fois, projet sans Firebase) :
+
+1. Créer un projet sur [console.cloud.google.com](https://console.cloud.google.com/) et activer **Google Drive API**.
+2. Google Auth Platform :
+   - **Branding** : nom, e-mail d'assistance, page d'accueil `https://dc-commits.github.io/capyboard/`, règles de confidentialité `https://dc-commits.github.io/capyboard/privacy.html`, domaine autorisé `dc-commits.github.io`. Pas de logo : il imposerait une validation de la marque par Google ;
+   - **Accès aux données** : scope `.../auth/drive.file` ;
+   - **Audience** : type « Externe », puis **publier l'app** (« En production »). En mode « Test », l'accès expire au bout de 7 jours. `drive.file` n'est pas un scope sensible : pas de validation Google à demander.
+3. Identifiants → **ID client OAuth de type Android** : paquet `com.dccommits.capyboard` et empreinte **SHA-1** de la clé de signature EAS (`npx eas-cli@latest credentials -p android`, ou page Credentials du projet sur expo.dev). Rien à recopier dans le code : Google reconnaît l'app à son paquet et à sa signature.
+
+Le plugin Expo de la librairie n'est pas déclaré dans `app.json` : sans Firebase il ne configure que iOS, et exige un `iosUrlScheme`. Pour une version iOS, il faudra un ID client iOS et ajouter le plugin avec cet `iosUrlScheme`.
+
+Ces deux pages sont dans [`docs/`](docs), publiées par GitHub Pages (branche `main`, dossier `/docs`).
 
 ## Logo et icônes
 

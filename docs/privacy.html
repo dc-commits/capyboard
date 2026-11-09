@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confidentialité · Capy Board</title>
+    <meta name="description" content="Règles de confidentialité de l’application Capy Board." />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <a href="./"><img src="logo.png" alt="Capy Board" width="120" height="121" /></a>
+        <h1>Règles de confidentialité</h1>
+        <p class="tagline">Dernière mise à jour : 9 novembre 2026</p>
+      </header>
+
+      <section>
+        <h2>En bref</h2>
+        <p>
+          Capy Board ne collecte, ne vend et ne partage aucune donnée personnelle. L’app n’a ni compte, ni serveur, ni publicité, ni outil de
+          mesure d’audience.
+        </p>
+      </section>
+
+      <section>
+        <h2>Données stockées sur le téléphone</h2>
+        <p>
+          Les parties, les profils de joueurs (prénom ou pseudo, avatar, couleur), les jeux créés, la bibliothèque et les favoris sont
+          enregistrés uniquement dans la mémoire du téléphone. Ils ne sont envoyés nulle part, sauf si vous activez la sauvegarde Google Drive
+          décrite ci-dessous. Désinstaller l’app les efface.
+        </p>
+      </section>
+
+      <section>
+        <h2>Sauvegarde Google Drive (facultative)</h2>
+        <p>Si vous connectez votre compte Google dans l’écran « Sauvegarde » :</p>
+        <ul>
+          <li>
+            l’app demande uniquement l’accès <code>drive.file</code> : elle ne peut lire et modifier que les fichiers qu’elle a créés elle-même, et
+            ne voit pas le reste de votre Drive ;
+          </li>
+          <li>
+            elle y range un fichier « Capy Board - sauvegarde.json », qui contient les données listées ci-dessus, pour les restaurer plus tard ou sur
+            un autre téléphone ;
+          </li>
+          <li>
+            les échanges se font directement entre le téléphone et Google Drive, sans passer par un serveur tiers. Votre adresse e-mail Google est
+            seulement affichée dans l’app pour indiquer le compte connecté.
+          </li>
+        </ul>
+        <p>
+          Vous pouvez vous déconnecter à tout moment depuis l’app, supprimer le fichier de votre Drive, et retirer l’accès de Capy Board dans les
+          paramètres de votre compte Google (<a href="https://myaccount.google.com/connections">myaccount.google.com/connections</a>).
+        </p>
+        <p>
+          L’utilisation des informations reçues des API Google respecte les
+          <a href="https://developers.google.com/terms/api-services-user-data-policy">règles relatives aux données utilisateur des services d’API Google</a>,
+          y compris les exigences d’utilisation limitée.
+        </p>
+      </section>
+
+      <section>
+        <h2>Mises à jour de l’app</h2>
+        <p>
+          Au lancement, l’app vérifie auprès du service Expo (EAS Update) si une nouvelle version est disponible. Cette vérification ne transmet
+          aucune donnée de jeu ni aucune donnée personnelle.
+        </p>
+      </section>
+
+      <section>
+        <h2>Contact</h2>
+        <p>Pour toute question : <a href="https://github.com/dc-commits/capyboard/issues">github.com/dc-commits/capyboard/issues</a>.</p>
+      </section>
+
+      <footer><a href="./">Capy Board</a></footer>
+    </main>
+  </body>
+</html>
