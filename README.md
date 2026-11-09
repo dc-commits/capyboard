@@ -128,7 +128,8 @@ Un **nouveau build** reste nécessaire pour une librairie native, l'icône ou l'
 
 Le logo source est [`assets/brand/capyboard-logo-source.webp`](assets/brand/capyboard-logo-source.webp) (1254 × 1254, fond transparent). Les images de l'app en sont dérivées :
 
-- `logo.png` et `splash-icon.png` : le logo complet, recadré sur son contenu ;
+- `logo.png` : le logo complet, recadré sur son contenu ;
+- `splash-icon.png` : le même logo avec une marge transparente, pour qu'il tienne entier dans le cercle où Android 12+ découpe l'icône de démarrage (les 2/3 centraux de l'image) ;
 - `icon.png` : le buste du capybara (sans le texte, illisible en petit) sur le jaune du soleil `#FDD447` ;
 - `android-icon-foreground.png` : le même buste, réduit pour tenir dans le cercle de l'icône adaptative Android (fond `#FDD447`) ;
 - `favicon.png` : le buste en 48 px.
