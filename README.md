@@ -10,13 +10,14 @@ Application mobile (Android, iOS) pour lire les règles de ses jeux de société
 
 ## Fonctionnalités
 
-- **Bibliothèque de jeux** : on choisit ses jeux dans le catalogue (Skyjo, Capybaraka, Flip 7, Odin, 6 qui prend !, Le Baron, Mycelia, Service compris !) et on peut **créer les siens** depuis l'app (fiche, fin de partie, règles).
+- **Bibliothèque de jeux** : on choisit ses jeux dans le catalogue (Skyjo, Capybaraka, Flip 7, Flip 7: With a Vengeance, Odin, 6 qui prend !, Le Baron, Mycelia, Service compris !) et on peut **créer les siens** depuis l'app (fiche, fin de partie, règles).
 - **Recherche, tri et filtres** : favoris en tête, tri A → Z, plus joués ou récents, filtres par nombre de joueurs et durée.
 - **Règles** détaillées par sections, résumées d'après les livrets officiels.
 - **Feuille de score** par manche, avec une aide au calcul propre à chaque jeu :
   - Skyjo : grille + « a fini la manche », doublement automatique du finisseur ;
   - Capybaraka : somme des cartes, pastèques et Fiesta, départage officiel des égalités ;
   - Flip 7 : sélection des cartes dans une fenêtre (numéros, bonus, ×2, Sauté), Flip 7 détecté seul ;
+  - Flip 7: With a Vengeance : même saisie avec le 13, le Lucky 13, les malus et le ÷2 (The Zero et plancher à 0 gérés) ;
   - Odin : cartes restées en main ;
   - 6 qui prend ! et Le Baron : têtes de bœuf ;
   - Mycelia et Service compris ! : jeux sans score, on désigne simplement le ou les gagnants.

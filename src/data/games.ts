@@ -111,6 +111,27 @@ function flip7Score(detail: RoundDetail): number {
   return numbers * (detail.double ? 2 : 1) + bonus + (flip7NumberCount(detail) === 7 ? 15 : 0);
 }
 
+const VENGEANCE_NUMBERS = Array.from({ length: 14 }, (_, value) => value);
+const VENGEANCE_PENALTIES = [2, 4, 6, 8, 10];
+
+/** Numéros du Flip 7, le second 13 permis par le Lucky 13 compris */
+function vengeanceNumberCount(detail: RoundDetail): number {
+  return VENGEANCE_NUMBERS.filter((value) => detail[`n${value}`]).length + (detail.lucky13 ? 1 : 0);
+}
+
+/** Flip 7: With a Vengeance : numéros (÷2 arrondi en dessous), malus, plancher à 0, puis 15 points pour un Flip 7 */
+function vengeanceScore(detail: RoundDetail): number {
+  if (detail.bust) return 0;
+  const flip7 = vengeanceNumberCount(detail) === 7;
+  // The Zero : 0 point pour la manche, sauf Flip 7
+  if (detail.n0 && !flip7) return 0;
+  const numbers =
+    VENGEANCE_NUMBERS.reduce((sum, value) => sum + (detail[`n${value}`] ? value : 0), 0) + (detail.lucky13 ? 13 : 0);
+  const halved = detail.half ? Math.floor(numbers / 2) : numbers;
+  const penalties = VENGEANCE_PENALTIES.reduce((sum, value) => sum + (detail[`m${value}`] ? value : 0), 0);
+  return Math.max(0, halved - penalties) + (flip7 ? 15 : 0);
+}
+
 /** Capybaraka : 1, 3, 6, 10, 15 points pour 1 à 5 cartes Fiesta, puis +5 par carte */
 export function capybarakaFiestaPoints(cards: number): number {
   const table = [0, 1, 3, 6, 10, 15];
@@ -403,6 +424,122 @@ export const BUILT_IN_GAMES: Game[] = [
       {
         title: 'Fin de partie',
         body: 'À la fin de la manche où au moins un joueur atteint 200 points, le plus haut total gagne.',
+      },
+    ],
+  },
+  {
+    id: 'flip7-vengeance',
+    name: 'Flip 7: With a Vengeance',
+    emoji: '😈',
+    minPlayers: 3,
+    durationMinutes: 20,
+    winner: 'highest',
+    endCondition: { type: 'threshold', points: 200 },
+    scoring: {
+      entry: 'modal',
+      fields: [
+        ...VENGEANCE_NUMBERS.map((value): ScoreField => ({
+          kind: 'toggle',
+          key: `n${value}`,
+          label: String(value),
+          icon: String(value),
+          group: 'Numéros',
+          disabledWhen: 'bust',
+        })),
+        { kind: 'toggle', key: 'lucky13', label: '🍀13', icon: '🍀', group: 'Numéros', disabledWhen: 'bust' },
+        ...VENGEANCE_PENALTIES.map((value): ScoreField => ({
+          kind: 'toggle',
+          key: `m${value}`,
+          label: `−${value}`,
+          icon: `−${value}`,
+          group: 'Malus',
+          disabledWhen: 'bust',
+        })),
+        { kind: 'toggle', key: 'half', label: '÷2', icon: '÷2', group: 'Malus', disabledWhen: 'bust' },
+        { kind: 'toggle', key: 'bust', label: 'Sauté', icon: '💥' },
+      ],
+      groupLimits: { Numéros: 7 },
+      compute: (detail) => vengeanceScore(detail),
+      hint: (detail) => {
+        if (detail.bust) return 'Sauté : 0 point pour cette manche';
+        const count = vengeanceNumberCount(detail);
+        if (count === 7) return 'Flip 7 ! +15 points';
+        if (detail.n0) return `${count}/7 numéros · The Zero : 0 point sans Flip 7`;
+        return `${count}/7 numéros`;
+      },
+      tieBreakers: [],
+    },
+    rules: [
+      {
+        title: 'But du jeu',
+        body: 'La suite de Flip 7, plus méchante : mêmes « stop ou encore » et objectif de 200 points, mais les bonus deviennent des malus et les cartes action servent surtout à embêter les autres.',
+      },
+      {
+        title: 'Matériel',
+        body: '108 cartes :',
+        items: [
+          'Cartes numéro de 0 à 13 : autant d’exemplaires que leur valeur (treize 13, douze 12… un 1) et un seul 0.',
+          'Numéros spéciaux : The Zero (le 0), Unlucky 7 (un des 7) et Lucky 13 (un des 13).',
+          'Cartes action, deux de chaque : Just One More!, Flip Four!, Swap, Steal, Discard.',
+          'Cartes malus : −2, −4, −6, −8, −10 et ÷2.',
+          'Au-delà de 18 joueurs, ajouter un second paquet.',
+        ],
+      },
+      {
+        title: 'Mise en place et tour de jeu',
+        items: [
+          'Comme Flip 7 : le donneur distribue une carte face visible à chacun ; les cartes action et malus se résolvent aussitôt.',
+          'À son tour, on choisit Hit (encore une carte) ou Stay (on s’arrête pour la manche).',
+          'Recevoir un numéro qu’on a déjà fait sauter : 0 point pour la manche.',
+          'Un joueur qui s’est arrêté reste une cible pour les cartes action et malus, tant qu’il n’a pas sauté.',
+        ],
+      },
+      {
+        title: 'Flip 7',
+        body: 'Avoir 7 numéros devant soi termine immédiatement la manche pour tout le monde et rapporte 15 points de bonus. Le 0 compte, le Lucky 13 permet de compter deux 13, les malus ne comptent pas.',
+      },
+      {
+        title: 'Numéros spéciaux',
+        items: [
+          'The Zero : compte pour le Flip 7, mais on marque 0 pour la manche sauf si on réussit le Flip 7. On ne peut plus s’arrêter tant qu’on l’a.',
+          'Unlucky 7 : en le recevant, on défausse tous ses autres numéros et malus pour ne garder que lui. On ne peut pas sauter dessus ; un 7 suivant fait sauter.',
+          'Lucky 13 : permet de garder un second 13 sans sauter (les deux comptent). Un troisième 13 fait sauter.',
+          'Leur effet suit la carte si elle est volée ou échangée.',
+        ],
+      },
+      {
+        title: 'Cartes action',
+        body: 'Obligatoires dès qu’une cible valable existe ; on peut se viser soi-même (obligatoirement si on est le seul encore en jeu).',
+        items: [
+          'Just One More! : le joueur ciblé prend la carte suivante, puis s’arrête.',
+          'Flip Four! : le joueur ciblé prend les 4 cartes suivantes, une par une. On s’arrête plus tôt s’il saute ou réussit un Flip 7. Les cartes action et malus tirées se résolvent après les 4 cartes.',
+          'Swap : échanger deux cartes visibles entre deux joueurs. Un doublon ainsi créé fait sauter.',
+          'Steal : prendre une carte visible d’un autre joueur et la placer devant soi. Un doublon fait sauter.',
+          'Discard : faire défausser une carte à un joueur.',
+        ],
+      },
+      {
+        title: 'Cartes malus',
+        body: 'Elles se donnent à n’importe quel joueur qui n’a pas sauté. Ce ne sont pas des numéros : elles ne font pas sauter et ne comptent pas pour le Flip 7.',
+      },
+      {
+        title: 'Fin de manche et score',
+        body: 'La manche s’arrête quand plus personne n’est actif, ou dès qu’un joueur réussit un Flip 7. Calcul du score :',
+        items: [
+          '1. Additionner ses numéros.',
+          '2. Diviser par deux (arrondi en dessous) si on a le ÷2.',
+          '3. Retirer les malus −2 à −10. Le score de manche ne descend pas sous 0.',
+          '4. Ajouter 15 points en cas de Flip 7.',
+          'Un joueur qui a sauté, ou qui a The Zero sans Flip 7, marque 0.',
+        ],
+      },
+      {
+        title: 'Fin de partie',
+        body: 'À la fin de la manche où au moins un joueur atteint 200 points, le plus haut total gagne.',
+      },
+      {
+        title: 'Variante Brutal',
+        body: 'Le score de manche peut devenir négatif, les malus peuvent viser un joueur qui a sauté, et un Flip 7 permet de retirer 15 points à un adversaire au lieu de les gagner. Non gérée par le calcul automatique.',
       },
     ],
   },
