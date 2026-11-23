@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { NavigationBarScrim } from '@/components/NavigationBarScrim';
 import { SplashGate } from '@/components/SplashGate';
 import { WhatsNew } from '@/components/WhatsNew';
 import { BackupProvider } from '@/store/backup';
@@ -45,6 +46,7 @@ export default function RootLayout() {
                 <Stack.Screen name="games/new" options={{ title: 'Créer un jeu', presentation: 'modal' }} />
                 <Stack.Screen name="games/[id]/edit" options={{ title: 'Modifier le jeu', presentation: 'modal' }} />
               </Stack>
+              <NavigationBarScrim />
             </BackupProvider>
           </FavoritesProvider>
         </MatchesProvider>

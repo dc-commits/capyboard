@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Chip } from '@/components/Chip';
+import { SCRIM_FADE_HEIGHT } from '@/components/NavigationBarScrim';
 import type { RuleSection } from '@/data/games';
 import { useContentStyle } from '@/hooks/useContentStyle';
 import { useGames } from '@/store/games';
@@ -110,7 +111,7 @@ export default function RulesScreen() {
           accessibilityRole="button"
           accessibilityLabel="Remonter en haut des règles"
           onPress={() => scroll.current?.scrollTo({ y: 0, animated: true })}
-          style={({ pressed }) => [styles.backToTop, { bottom: bottom + 20 }, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.backToTop, { bottom: bottom + SCRIM_FADE_HEIGHT }, pressed && styles.pressed]}
         >
           <Text style={styles.backToTopText}>↑</Text>
         </Pressable>
