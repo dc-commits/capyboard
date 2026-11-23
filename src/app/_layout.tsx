@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { SplashGate } from '@/components/SplashGate';
 import { BackupProvider } from '@/store/backup';
 import { FavoritesProvider } from '@/store/favorites';
 import { GamesProvider } from '@/store/games';
@@ -14,6 +15,7 @@ export default function RootLayout() {
         <MatchesProvider>
           <FavoritesProvider>
             <BackupProvider>
+              <SplashGate />
               <StatusBar style="dark" />
               <Stack
                 screenOptions={{

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 type FavoritesContextValue = {
+  loaded: boolean;
   isFavorite: (gameId: string) => boolean;
   toggleFavorite: (gameId: string) => void;
 };
@@ -28,11 +29,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<FavoritesContextValue>(
     () => ({
+      loaded,
       isFavorite: (gameId) => favorites.includes(gameId),
       toggleFavorite: (gameId) =>
         setFavorites((current) => (current.includes(gameId) ? current.filter((id) => id !== gameId) : [...current, gameId])),
     }),
-    [favorites],
+    [favorites, loaded],
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
