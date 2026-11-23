@@ -42,6 +42,7 @@ export default function RootLayout() {
                 <Stack.Screen name="backup" options={{ title: 'Sauvegarde' }} />
                 <Stack.Screen name="tools" options={{ title: 'Boîte à outils' }} />
                 <Stack.Screen name="calendar" options={{ title: 'Calendrier' }} />
+                <Stack.Screen name="my-library" options={{ title: 'Ma bibliothèque' }} />
                 <Stack.Screen name="library" options={{ title: 'Ajouter des jeux' }} />
                 <Stack.Screen name="games/new" options={{ title: 'Créer un jeu', presentation: 'modal' }} />
                 <Stack.Screen name="games/[id]/edit" options={{ title: 'Modifier le jeu', presentation: 'modal' }} />

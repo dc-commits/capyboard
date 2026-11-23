@@ -11,7 +11,7 @@ Application mobile (Android, iOS) pour lire les règles de ses jeux de société
 ## Fonctionnalités
 
 - **Bibliothèque de jeux** : on choisit ses jeux dans le catalogue (Skyjo, Capybaraka, Flip 7, Flip 7: With a Vengeance, Odin, 6 qui prend !, Le Baron, Mycelia, Service compris !) et on peut **créer les siens** depuis l'app (fiche, fin de partie, règles).
-- **Recherche, tri et filtres** : favoris en tête, tri A → Z, plus joués ou récents, filtres par nombre de joueurs et durée.
+- **Accueil léger** : favoris et jeux joués récemment en tuiles, recherche dans tous les jeux ; la bibliothèque complète (tri A → Z, plus joués, récents, filtres par nombre de joueurs et durée) a son propre écran.
 - **Règles** détaillées par sections, résumées d'après les livrets officiels.
 - **Feuille de score** par manche, avec une aide au calcul propre à chaque jeu :
   - Skyjo : grille + « a fini la manche », doublement automatique du finisseur ;
@@ -64,7 +64,8 @@ npx expo lint
 ```
 src/
   app/                 Écrans (Expo Router)
-    index.tsx          Accueil : recherche, parties en cours, bibliothèque, tri et filtres
+    index.tsx          Accueil : recherche, parties en cours, favoris et jeux récents en tuiles
+    my-library.tsx     Ma bibliothèque : liste complète, tri et filtres
     library.tsx        Catalogue : ajouter/retirer des jeux, créer un jeu
     games/[id]/        Fiche d'un jeu, règles, nouvelle partie, modification
     games/new.tsx      Création d'un jeu

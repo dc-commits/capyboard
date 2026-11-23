@@ -14,6 +14,16 @@ export type ChangelogEntry = {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-23-d',
+    date: '2026-11-23',
+    title: 'Un accueil plus léger',
+    items: [
+      '⭐ L’accueil montre tes favoris et tes jeux récents en tuiles compactes',
+      '📚 Toute la bibliothèque, avec tri et filtres, est à un toucher : « Toute ma bibliothèque »',
+      '🔍 La recherche cherche toujours dans tous les jeux',
+    ],
+  },
+  {
     id: '2026-11-23-c',
     date: '2026-11-23',
     title: 'Boutons du téléphone bien visibles',
