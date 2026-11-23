@@ -1,6 +1,4 @@
-import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SCRIM_FADE_HEIGHT } from '@/components/NavigationBarScrim';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { common } from '@/theme';
 
@@ -14,7 +12,5 @@ const EXTRA_BOTTOM_SPACE = 32;
 export function useContentStyle() {
   const { bottom } = useSafeAreaInsets();
   const keyboardHeight = useKeyboardHeight();
-  // Sur Android, le dernier élément remonte au-dessus du fondu posé sous les boutons du système
-  const scrim = Platform.OS === 'android' && bottom > 0 && keyboardHeight === 0 ? SCRIM_FADE_HEIGHT : 0;
-  return [common.content, { paddingBottom: Math.max(bottom, keyboardHeight) + Math.max(EXTRA_BOTTOM_SPACE, scrim) }];
+  return [common.content, { paddingBottom: Math.max(bottom, keyboardHeight) + EXTRA_BOTTOM_SPACE }];
 }

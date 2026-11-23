@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Chip } from '@/components/Chip';
-import { SCRIM_FADE_HEIGHT } from '@/components/NavigationBarScrim';
 import type { RuleSection } from '@/data/games';
 import { useContentStyle } from '@/hooks/useContentStyle';
 import { useGames } from '@/store/games';
@@ -23,6 +22,8 @@ type RulesTab = string | null;
 
 /** En dessous, les règles tiennent sur un écran ou deux : pas besoin de sommaire */
 const TOC_MIN_SECTIONS = 4;
+/** Écart entre le bouton « remonter » et le bas de l'écran (au-dessus des boutons du téléphone) */
+const BACK_TO_TOP_MARGIN = 20;
 /** Défilement à partir duquel le bouton « remonter » apparaît */
 const BACK_TO_TOP_OFFSET = 500;
 /** Marge au-dessus d'une section quand on y saute, pour ne pas la coller au bord */
@@ -111,7 +112,7 @@ export default function RulesScreen() {
           accessibilityRole="button"
           accessibilityLabel="Remonter en haut des règles"
           onPress={() => scroll.current?.scrollTo({ y: 0, animated: true })}
-          style={({ pressed }) => [styles.backToTop, { bottom: bottom + SCRIM_FADE_HEIGHT }, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.backToTop, { bottom: bottom + BACK_TO_TOP_MARGIN }, pressed && styles.pressed]}
         >
           <Text style={styles.backToTopText}>↑</Text>
         </Pressable>

@@ -24,12 +24,6 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
-    id: '2026-11-23-c',
-    date: '2026-11-23',
-    title: 'Boutons du téléphone bien visibles',
-    items: ['🧡 Un fondu terracotta en bas de l’écran : les boutons retour, accueil et applis ressortent enfin'],
-  },
-  {
     id: '2026-11-23-b',
     date: '2026-11-23',
     title: 'Règles et scores plus pratiques',
