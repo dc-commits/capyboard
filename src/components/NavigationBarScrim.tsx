@@ -1,8 +1,9 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/theme';
 
-/** Brun du pelage du capybara : les boutons blancs du système ressortent dessus */
-const SCRIM_COLOR = '#4A2E1C';
+/** Terracotta de l'app (boutons, liens) : les boutons blancs du système ressortent dessus */
+const SCRIM_COLOR = colors.primary;
 /** Hauteur du fondu au-dessus de la zone des boutons : le contenu doit pouvoir défiler au-delà */
 export const SCRIM_FADE_HEIGHT = 56;
 /** Bandes superposées qui dessinent le fondu, sans librairie native */
