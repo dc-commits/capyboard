@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { NavigationBar } from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import { SplashGate } from '@/components/SplashGate';
 import { WhatsNew } from '@/components/WhatsNew';
@@ -19,6 +20,8 @@ export default function RootLayout() {
               <SplashGate />
               <WhatsNew />
               <StatusBar style="dark" />
+              {/* Boutons du téléphone foncés : ils ressortent sur le fond beige (Android, navigation à 3 boutons) */}
+              <NavigationBar style="dark" />
               <Stack
                 screenOptions={{
                   headerStyle: { backgroundColor: colors.background },

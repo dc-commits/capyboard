@@ -2,7 +2,7 @@
   "expo": {
     "name": "Capy Board",
     "slug": "capyboard",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -17,7 +17,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.dccommits.capyboard",
-      "versionCode": 6
+      "versionCode": 7
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,7 +32,15 @@
           "imageWidth": 240,
           "resizeMode": "contain"
         }
-      ]
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false,
+          "style": "dark"
+        }
+      ],
+      "expo-status-bar"
     ],
     "scheme": "capyboard",
     "experiments": {

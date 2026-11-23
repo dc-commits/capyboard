@@ -14,6 +14,12 @@ export type ChangelogEntry = {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-23-e',
+    date: '2026-11-23',
+    title: 'Boutons du téléphone bien visibles',
+    items: ['📱 Les boutons retour, accueil et applis du téléphone passent en foncé : ils ressortent sur le fond de l’app'],
+  },
+  {
     id: '2026-11-23-d',
     date: '2026-11-23',
     title: 'Un accueil plus léger',
