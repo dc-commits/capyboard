@@ -1,8 +1,9 @@
 import { useState, type Dispatch, type SetStateAction } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { ScoreInput } from '@/components/ScoreInput';
 import type { DetailedScoring, RoundDetail, ScoreField } from '@/data/games';
 import { colors, common } from '@/theme';
 
@@ -89,14 +90,13 @@ function PlayerFields({ scoring, values, onText, onToggle }: PlayerFieldsProps) 
                 <Text style={styles.label}>
                   {field.icon} {field.label}
                 </Text>
-                <TextInput
-                  style={[common.input, styles.input, disabled && styles.disabled]}
+                <ScoreInput
+                  signed={field.signed}
                   editable={!disabled}
                   value={disabled ? '' : (values?.[field.key] ?? '')}
-                  keyboardType={field.signed ? 'numbers-and-punctuation' : 'number-pad'}
                   placeholder={disabled ? '–' : '0'}
-                  placeholderTextColor={colors.muted}
                   onChangeText={(text) => onText(field.key, text)}
+                  accessibilityLabel={field.label}
                 />
               </View>
             );
@@ -307,7 +307,6 @@ const styles = StyleSheet.create({
   field: { flex: 1, gap: 4 },
   group: { gap: 6 },
   label: { fontSize: 12, color: colors.muted },
-  input: { minWidth: 0, textAlign: 'center', paddingVertical: 8 },
   disabled: { opacity: 0.35 },
   cards: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   cardTile: {

@@ -1,9 +1,10 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { DetailedRoundEntry, formatDetail, parseDetail, type DetailDraft } from '@/components/DetailedRoundEntry';
+import { ScoreInput } from '@/components/ScoreInput';
 import { WinnerPicker } from '@/components/WinnerPicker';
 import { useContentStyle } from '@/hooks/useContentStyle';
 import { useGames } from '@/store/games';
@@ -175,15 +176,15 @@ export default function MatchScreen() {
                 <View style={[styles.row, styles.roundRow]}>
                   <Text style={[styles.cell, styles.roundCell, styles.muted]}>{match.rounds.length + 1}</Text>
                   {values.map((value, index) => (
-                    <TextInput
+                    <ScoreInput
                       key={index}
-                      style={[common.input, styles.cell, styles.scoreInput]}
+                      compact
+                      signed
+                      style={styles.cell}
                       value={value}
-                      keyboardType="numbers-and-punctuation"
-                      placeholder="0"
-                      placeholderTextColor={colors.muted}
                       onChangeText={(text) => setDraft(() => values.map((current, i) => (i === index ? text : current)))}
                       onSubmitEditing={() => canAdd && submitRound()}
+                      accessibilityLabel={`Score de ${match.players[index]}`}
                     />
                   ))}
                 </View>
@@ -291,7 +292,6 @@ const styles = StyleSheet.create({
   head: { fontWeight: '700', paddingBottom: 6, fontSize: 16, color: colors.text },
   headCell: { alignItems: 'center', gap: 4 },
   muted: { color: colors.muted },
-  scoreInput: { minWidth: 0, paddingHorizontal: 4, paddingVertical: 8 },
   total: { fontWeight: '700', fontSize: 18 },
   detail: { fontSize: 11, fontWeight: '400', color: colors.muted },
   leader: { color: colors.success },

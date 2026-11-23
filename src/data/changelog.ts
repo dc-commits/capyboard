@@ -14,6 +14,16 @@ export type ChangelogEntry = {
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: '2026-11-23-b',
+    date: '2026-11-23',
+    title: 'Règles et scores plus pratiques',
+    items: [
+      '📖 Sommaire en haut des règles longues : un toucher pour aller à la bonne section',
+      '⬆️ Bouton pour remonter en haut des règles',
+      '➖ Bouton ± à côté des scores qui peuvent être négatifs (Skyjo, Capybaraka, jeux créés)',
+    ],
+  },
+  {
     id: '2026-11-23',
     date: '2026-11-23',
     title: 'Vengeance et démarrage éclair',
