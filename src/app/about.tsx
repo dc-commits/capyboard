@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { router } from 'expo-router';
 import * as Updates from 'expo-updates';
 import { useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -43,6 +44,8 @@ export default function AboutScreen() {
         />
         <Text style={common.subtitle}>Version {Constants.expoConfig?.version ?? '–'}</Text>
       </View>
+
+      <Button label="🎁 Quoi de neuf ?" variant="secondary" onPress={() => router.push('/whats-new')} />
 
       <Text style={common.sectionTitle}>Mises à jour</Text>
       <View style={[common.card, styles.updates]}>

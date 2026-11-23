@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SplashGate } from '@/components/SplashGate';
+import { WhatsNew } from '@/components/WhatsNew';
 import { BackupProvider } from '@/store/backup';
 import { FavoritesProvider } from '@/store/favorites';
 import { GamesProvider } from '@/store/games';
@@ -16,6 +17,7 @@ export default function RootLayout() {
           <FavoritesProvider>
             <BackupProvider>
               <SplashGate />
+              <WhatsNew />
               <StatusBar style="dark" />
               <Stack
                 screenOptions={{
@@ -35,6 +37,7 @@ export default function RootLayout() {
                 <Stack.Screen name="players/new" options={{ title: 'Nouveau joueur', presentation: 'modal' }} />
                 <Stack.Screen name="players/[id]" options={{ title: '' }} />
                 <Stack.Screen name="about" options={{ title: 'À propos' }} />
+                <Stack.Screen name="whats-new" options={{ title: 'Quoi de neuf' }} />
                 <Stack.Screen name="backup" options={{ title: 'Sauvegarde' }} />
                 <Stack.Screen name="tools" options={{ title: 'Boîte à outils' }} />
                 <Stack.Screen name="calendar" options={{ title: 'Calendrier' }} />

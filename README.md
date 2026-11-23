@@ -124,6 +124,8 @@ L'APK écoute le canal `preview` d'EAS Update. Pour envoyer une évolution sans 
 npm run update:preview -- --message "Description de la nouveauté"
 ```
 
+Avant de publier une nouveauté visible, ajouter une entrée en tête de [`src/data/changelog.ts`](src/data/changelog.ts) (identifiant unique, date, titre, une ligne par nouveauté) : la fenêtre « Quoi de neuf » s'affiche alors une fois au lancement suivant. Une première installation ne la voit pas, et l'historique complet reste accessible depuis « À propos ».
+
 Sur le téléphone, l'app télécharge la mise à jour au lancement et affiche un bandeau « Nouvelle version prête » sur l'accueil : un toucher l'installe. L'écran « À propos » permet aussi de vérifier à la main.
 
 Un **nouveau build** reste nécessaire pour une librairie native, l'icône ou l'écran de démarrage, avec `android.versionCode` augmenté dans `app.json`. Pour une **librairie native**, augmenter aussi `version` : le runtime suit la version, ce qui évite d'envoyer une mise à jour à un APK incompatible. Un changement d'icône ou d'écran de démarrage ne touche pas au code et garde la même `version`.
